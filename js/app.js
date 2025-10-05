@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- State Management ---
     const state = {
         currentView: 'products',
-        productList: [], // Will be populated from the API
+        productList: [],
         order: {
             items: [],
             customer: {},
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             discount_amount: 0,
             final_amount: 0,
         },
+        ordersDebounceTimeout: null,
     };
 
     // --- DOM Elements ---
@@ -46,24 +47,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalPriceSpan = document.getElementById('totalPrice');
     const nextStep1Btn = document.getElementById('nextStep1');
 
-    // Other elements remain the same...
+    // View Orders Elements
+    const searchOrderInput = document.getElementById('searchOrder');
+    const statusFilterSelect = document.getElementById('statusFilter');
+    const ordersTableBody = document.getElementById('ordersTableBody');
+    const emptyStateDiv = document.getElementById('emptyState');
+    const lastUpdateSpan = document.getElementById('lastUpdate');
+
+    // Other elements
     const customerForm = document.getElementById('customerForm');
     const firstNameInput = document.getElementById('firstName');
     const lastNameInput = document.getElementById('lastName');
     const phoneInput = document.getElementById('phone');
     const finalOrderDetailsDiv = document.getElementById('finalOrderDetails');
+    const paymentConfirmationForm = document.getElementById('paymentConfirmationForm');
+    const confirmationOrderDetailsDiv = document.getElementById('confirmationOrderDetails');
+    const finalOrderNumberSpan = document.getElementById('finalOrderNumber');
     const paymentRadios = document.querySelectorAll('input[name="payment"]');
     const bankTransferDetails = document.getElementById('bankTransferDetails');
     const promptpayDetails = document.getElementById('promptpayDetails');
     const processPaymentBtn = document.getElementById('processPayment');
-    const paymentConfirmationForm = document.getElementById('paymentConfirmationForm');
-    const confirmationOrderDetailsDiv = document.getElementById('confirmationOrderDetails');
+    const paymentSlipInput = document.getElementById('paymentSlip');
     const uploadArea = document.getElementById('uploadArea');
     const uploadPreview = document.getElementById('uploadPreview');
     const previewImage = document.getElementById('previewImage');
     const fileNameSpan = document.getElementById('fileName');
-    const paymentSlipInput = document.getElementById('paymentSlip');
-    const finalOrderNumberSpan = document.getElementById('finalOrderNumber');
 
     // --- Dynamic Rendering ---
     const renderProducts = (products) => {
@@ -71,10 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const bracelet = products.find(p => p.category === 'bracelet');
         const shirt = products.find(p => p.category === 'shirt');
         const combo = products.find(p => p.category === 'combo');
-
         let html = '';
-
-        // Main product grid
         html += '<div class="grid md:grid-cols-2 gap-8 mb-8">';
         if (bracelet) {
             html += `
@@ -124,9 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         }
-        html += '</div>'; // End grid
-
-        // Combo offer
+        html += '</div>';
         if (combo && bracelet && shirt) {
             const originalPrice = parseFloat(bracelet.price) + parseFloat(shirt.price);
             const discount = combo.discount_amount ? parseFloat(combo.discount_amount) : originalPrice - parseFloat(combo.price);
@@ -150,7 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         }
-
         container.innerHTML = html;
     };
 
@@ -158,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const bracelet = products.find(p => p.category === 'bracelet');
         const shirt = products.find(p => p.category === 'shirt');
         const combo = products.find(p => p.category === 'combo');
-
         if(bracelet && braceletCheckbox) {
             const braceletLabel = braceletCheckbox.closest('label');
             if (braceletLabel) {
@@ -173,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 shirtLabel.querySelector('.font-medium').textContent = shirt.name;
                 shirtLabel.querySelector('.text-sm').textContent = shirt.description;
                 shirtLabel.querySelector('.text-purple-600').textContent = `฿${parseFloat(shirt.price)} / ตัว`;
-                
                 const sizeContainer = document.querySelector('#sizeSelection .flex');
                 if(sizeContainer) {
                     sizeContainer.innerHTML = shirt.sizes.map(size => `
@@ -198,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('api/get_products.php');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-
             if (data.success && data.products.length > 0) {
                 state.productList = data.products;
                 renderProducts(data.products);
@@ -212,76 +211,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const updatePrice = () => {
-        const bracelet = state.productList.find(p => p.category === 'bracelet');
-        const shirt = state.productList.find(p => p.category === 'shirt');
-        const combo = state.productList.find(p => p.category === 'combo');
+    const loadAndRenderOrders = async () => {
+        const query = searchOrderInput.value;
+        const status = statusFilterSelect.value;
+        ordersTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
 
-        if (!bracelet || !shirt) return;
+        try {
+            const response = await fetch(`api/get_orders.php?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}`);
+            const data = await response.json();
 
-        let total = 0;
-        let breakdown = '';
-        let items = [];
-        
-        const braceletQty = parseInt(braceletQtyInput.value);
-        const shirtQty = parseInt(shirtQtyInput.value);
-
-        const isBraceletSelected = braceletCheckbox.checked;
-        const isShirtSelected = shirtCheckbox.checked;
-        const isCombo = isBraceletSelected && isShirtSelected && combo;
-
-        let comboQty = 0;
-        let regularBraceletQty = 0;
-        let regularShirtQty = 0;
-        let discount = 0;
-
-        if (isCombo) {
-            const discountPerCombo = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price);
-            comboQty = Math.min(braceletQty, shirtQty);
-            regularBraceletQty = braceletQty - comboQty;
-            regularShirtQty = shirtQty - comboQty;
-            discount = comboQty * discountPerCombo;
-
-            if (comboQty > 0) {
-                const comboFinalPrice = parseFloat(combo.price) * comboQty;
-                total += comboFinalPrice;
-                breakdown += `<div>🎁 ${combo.name} x${comboQty}: <span class="font-semibold">฿${comboFinalPrice.toLocaleString()}</span></div>`;
-                items.push({ product_id: combo.id, product_name: combo.name, quantity: comboQty, unit_price: parseFloat(combo.price), subtotal: comboFinalPrice });
+            if (data.success) {
+                lastUpdateSpan.textContent = new Date().toLocaleTimeString();
+                if (data.orders.length > 0) {
+                    ordersTableBody.parentElement.classList.remove('hidden');
+                    emptyStateDiv.classList.add('hidden');
+                    let rowsHtml = data.orders.map(order => {
+                        const createdDate = new Date(order.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+                        let statusClass = '';
+                        switch(order.status) {
+                            case 'รอชำระเงิน': statusClass = 'bg-yellow-100 text-yellow-800'; break;
+                            case 'รอตรวจสอบการชำระเงิน': statusClass = 'bg-blue-100 text-blue-800'; break;
+                            case 'รอจัดส่ง': statusClass = 'bg-indigo-100 text-indigo-800'; break;
+                            case 'จัดส่งแล้ว': statusClass = 'bg-purple-100 text-purple-800'; break;
+                            case 'สำเร็จ': statusClass = 'bg-green-100 text-green-800'; break;
+                            case 'ยกเลิก': statusClass = 'bg-red-100 text-red-800'; break;
+                            default: statusClass = 'bg-gray-100 text-gray-800';
+                        }
+                        return `
+                            <tr class="hover:bg-gray-50">
+                                <td class="border-b border-gray-200 px-4 py-3 font-mono text-sm text-purple-700">${order.id}</td>
+                                <td class="border-b border-gray-200 px-4 py-3">${order.first_name} ${order.last_name}</td>
+                                <td class="border-b border-gray-200 px-4 py-3">${order.phone}</td>
+                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-600">${order.items_summary || 'N/A'}</td>
+                                <td class="border-b border-gray-200 px-4 py-3 font-semibold">฿${parseFloat(order.final_amount).toLocaleString()}</td>
+                                <td class="border-b border-gray-200 px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${order.status}</span></td>
+                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-500">${createdDate}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    ordersTableBody.innerHTML = rowsHtml;
+                } else {
+                    ordersTableBody.parentElement.classList.add('hidden');
+                    emptyStateDiv.classList.remove('hidden');
+                }
+            } else {
+                ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">เกิดข้อผิดพลาด: ${data.message}</td></tr>`;
             }
-        } else {
-            regularBraceletQty = isBraceletSelected ? braceletQty : 0;
-            regularShirtQty = isShirtSelected ? shirtQty : 0;
+        } catch (error) {
+            console.error('Failed to load orders:', error);
+            ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
         }
-
-        if (regularBraceletQty > 0) {
-            const braceletPrice = parseFloat(bracelet.price) * regularBraceletQty;
-            total += braceletPrice;
-            breakdown += `<div>📿 ${bracelet.name} x${regularBraceletQty}: <span class="font-semibold">฿${braceletPrice.toLocaleString()}</span></div>`;
-            items.push({ product_id: bracelet.id, product_name: bracelet.name, quantity: regularBraceletQty, unit_price: parseFloat(bracelet.price), subtotal: braceletPrice });
-        }
-
-        if (regularShirtQty > 0) {
-            const shirtPrice = parseFloat(shirt.price) * regularShirtQty;
-            total += shirtPrice;
-            breakdown += `<div>👕 ${shirt.name} x${regularShirtQty}: <span class="font-semibold">฿${shirtPrice.toLocaleString()}</span></div>`;
-            items.push({ product_id: shirt.id, product_name: shirt.name, quantity: regularShirtQty, unit_price: parseFloat(shirt.price), subtotal: shirtPrice });
-        }
-
-        if (!isBraceletSelected && !isShirtSelected) {
-            breakdown = '<div>กรุณาเลือกสินค้า</div>';
-        }
-
-        priceBreakdownDiv.innerHTML = breakdown;
-        totalPriceSpan.textContent = `฿${total.toLocaleString()}`;
-
-        state.order.items = items;
-        state.order.total_amount = total + discount;
-        state.order.discount_amount = discount;
-        state.order.final_amount = total;
-
-        nextStep1Btn.disabled = total <= 0;
     };
 
+    // --- Core Logic & Event Listeners ---
     const updateTabs = (activeTab) => {
         allTabs.forEach(tab => {
             tab.classList.remove('bg-purple-600', 'text-white');
@@ -296,11 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         viewToShow.classList.remove('hidden');
     };
 
-    const showStep = (stepNumber) => {
-        steps.forEach((step, index) => {
-            step.classList.toggle('hidden', index + 1 !== stepNumber);
-        });
-    };
+    const showStep = (stepNumber) => { steps.forEach((step, index) => { step.classList.toggle('hidden', index + 1 !== stepNumber); }); };
 
     window.switchToProductsView = () => {
         state.currentView = 'products';
@@ -313,18 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTabs(newOrderTab);
         showView(newOrderView);
         showStep(1);
-
         state.order = { items: [], customer: {}, payment: {}, total_amount: 0, discount_amount: 0, final_amount: 0 };
         if(braceletCheckbox) braceletCheckbox.checked = false;
         if(shirtCheckbox) shirtCheckbox.checked = false;
-        
         if (preselect === 'bracelet') if(braceletCheckbox) braceletCheckbox.checked = true;
         if (preselect === 'shirt') if(shirtCheckbox) shirtCheckbox.checked = true;
         if (preselect === 'combo') {
             if(braceletCheckbox) braceletCheckbox.checked = true;
             if(shirtCheckbox) shirtCheckbox.checked = true;
         }
-        
         handleProductSelection();
         updatePrice();
     };
@@ -333,116 +308,98 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentView = 'viewOrders';
         updateTabs(viewOrdersTab);
         showView(ordersView);
+        loadAndRenderOrders();
     };
 
     window.goBackToStep1 = () => showStep(1);
     window.goBackToStep2 = () => showStep(2);
     window.goBackToStep3 = () => showStep(3);
 
-    const handleProductSelection = () => {
-        if(!braceletCheckbox || !shirtCheckbox) return;
-        braceletQuantityDiv.classList.toggle('hidden', !braceletCheckbox.checked);
-        shirtQuantityDiv.classList.toggle('hidden', !shirtCheckbox.checked);
-        sizeSelectionDiv.classList.toggle('hidden', !shirtCheckbox.checked);
-        
-        const isCombo = braceletCheckbox.checked && shirtCheckbox.checked;
-        comboOptionCheckbox.checked = isCombo;
-        comboOptionCheckbox.disabled = !isCombo;
-
-        updatePrice();
-    };
-
-    window.updateQuantity = (product, change) => {
-        const input = product === 'bracelet' ? braceletQtyInput : shirtQtyInput;
-        let currentValue = parseInt(input.value);
-        currentValue += change;
-        if (currentValue < 1) currentValue = 1;
-        input.value = currentValue;
-        updatePrice();
-    };
-
+    const handleProductSelection = () => { if(!braceletCheckbox || !shirtCheckbox) return; braceletQuantityDiv.classList.toggle('hidden', !braceletCheckbox.checked); shirtQuantityDiv.classList.toggle('hidden', !shirtCheckbox.checked); sizeSelectionDiv.classList.toggle('hidden', !shirtCheckbox.checked); const isCombo = braceletCheckbox.checked && shirtCheckbox.checked; comboOptionCheckbox.checked = isCombo; comboOptionCheckbox.disabled = !isCombo; updatePrice(); };
+    window.updateQuantity = (product, change) => { const input = product === 'bracelet' ? braceletQtyInput : shirtQtyInput; let currentValue = parseInt(input.value); currentValue += change; if (currentValue < 1) currentValue = 1; input.value = currentValue; updatePrice(); };
+    const updatePrice = () => { const bracelet = state.productList.find(p => p.category === 'bracelet'); const shirt = state.productList.find(p => p.category === 'shirt'); const combo = state.productList.find(p => p.category === 'combo'); if (!bracelet || !shirt) return; let total = 0; let breakdown = ''; let items = []; const braceletQty = parseInt(braceletQtyInput.value); const shirtQty = parseInt(shirtQtyInput.value); const isBraceletSelected = braceletCheckbox.checked; const isShirtSelected = shirtCheckbox.checked; const isCombo = isBraceletSelected && isShirtSelected && combo; let comboQty = 0; let regularBraceletQty = 0; let regularShirtQty = 0; let discount = 0; if (isCombo) { const discountPerCombo = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price); comboQty = Math.min(braceletQty, shirtQty); regularBraceletQty = braceletQty - comboQty; regularShirtQty = shirtQty - comboQty; discount = comboQty * discountPerCombo; if (comboQty > 0) { const comboFinalPrice = parseFloat(combo.price) * comboQty; total += comboFinalPrice; breakdown += `<div>🎁 ${combo.name} x${comboQty}: <span class="font-semibold">฿${comboFinalPrice.toLocaleString()}</span></div>`; items.push({ product_id: combo.id, product_name: combo.name, quantity: comboQty, unit_price: parseFloat(combo.price), subtotal: comboFinalPrice }); } } else { regularBraceletQty = isBraceletSelected ? braceletQty : 0; regularShirtQty = isShirtSelected ? shirtQty : 0; } if (regularBraceletQty > 0) { const braceletPrice = parseFloat(bracelet.price) * regularBraceletQty; total += braceletPrice; breakdown += `<div>📿 ${bracelet.name} x${regularBraceletQty}: <span class="font-semibold">฿${braceletPrice.toLocaleString()}</span></div>`; items.push({ product_id: bracelet.id, product_name: bracelet.name, quantity: regularBraceletQty, unit_price: parseFloat(bracelet.price), subtotal: braceletPrice }); } if (regularShirtQty > 0) { const shirtPrice = parseFloat(shirt.price) * regularShirtQty; total += shirtPrice; breakdown += `<div>👕 ${shirt.name} x${regularShirtQty}: <span class="font-semibold">฿${shirtPrice.toLocaleString()}</span></div>`; items.push({ product_id: shirt.id, product_name: shirt.name, quantity: regularShirtQty, unit_price: parseFloat(shirt.price), subtotal: shirtPrice }); } if (!isBraceletSelected && !isShirtSelected) { breakdown = '<div>กรุณาเลือกสินค้า</div>'; } priceBreakdownDiv.innerHTML = breakdown; totalPriceSpan.textContent = `฿${total.toLocaleString()}`; state.order.items = items; state.order.total_amount = total + discount; state.order.discount_amount = discount; state.order.final_amount = total; nextStep1Btn.disabled = total <= 0; };
+    
     customerForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedSize = document.querySelector('input[name="size"]:checked');
-
         if (shirtCheckbox.checked && !selectedSize) {
-            alert('กรุณาเลือกไซส์เสื้อ');
+            Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกไซส์เสื้อ' });
             return;
         }
-
         state.order.customer = { first_name: firstNameInput.value, last_name: lastNameInput.value, phone: phoneInput.value };
-        
-        if (selectedSize) {
-            const shirt = state.productList.find(p => p.category === 'shirt');
-            const combo = state.productList.find(p => p.category === 'combo');
-            const shirtItem = state.order.items.find(item => shirt && item.product_id === shirt.id);
-            const comboItem = state.order.items.find(item => combo && item.product_id === combo.id);
-            if(shirtItem) shirtItem.size = selectedSize.value;
-            if(comboItem) comboItem.size = selectedSize.value;
-        }
-
-        let summaryHtml = `<div class="space-y-2 text-sm">
-                <div class="flex justify-between"><span class="text-gray-600">ลูกค้า:</span> <span class="font-semibold">${state.order.customer.first_name} ${state.order.customer.last_name}</span></div>
-                <div class="flex justify-between"><span class="text-gray-600">เบอร์โทร:</span> <span class="font-semibold">${state.order.customer.phone}</span></div>
-                <div class="border-t my-2"></div>`;
-        state.order.items.forEach(item => {
-            summaryHtml += `<div class="flex justify-between">
-                <span>${item.product_name} x${item.quantity} ${item.size ? `(ไซส์ ${item.size})` : ''}</span>
-                <span class="font-semibold">฿${item.subtotal.toLocaleString()}</span>
-            </div>`;
-        });
-        summaryHtml += `<div class="border-t my-2"></div>
-                <div class="flex justify-between text-lg font-bold text-purple-600">
-                    <span>ยอดรวมสุทธิ:</span>
-                    <span>฿${state.order.final_amount.toLocaleString()}</span>
-                </div></div>`;
+        if (selectedSize) { const shirt = state.productList.find(p => p.category === 'shirt'); const combo = state.productList.find(p => p.category === 'combo'); const shirtItem = state.order.items.find(item => shirt && item.product_id === shirt.id); const comboItem = state.order.items.find(item => combo && item.product_id === combo.id); if(shirtItem) shirtItem.size = selectedSize.value; if(comboItem) comboItem.size = selectedSize.value; }
+        let summaryHtml = `<div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-600">ลูกค้า:</span> <span class="font-semibold">${state.order.customer.first_name} ${state.order.customer.last_name}</span></div><div class="flex justify-between"><span class="text-gray-600">เบอร์โทร:</span> <span class="font-semibold">${state.order.customer.phone}</span></div><div class="border-t my-2"></div>`;
+        state.order.items.forEach(item => { summaryHtml += `<div class="flex justify-between"><span>${item.product_name} x${item.quantity} ${item.size ? `(ไซส์ ${item.size})` : ''}</span><span class="font-semibold">฿${item.subtotal.toLocaleString()}</span></div>`; });
+        summaryHtml += `<div class="border-t my-2"></div><div class="flex justify-between text-lg font-bold text-purple-600"><span>ยอดรวมสุทธิ:</span><span>฿${state.order.final_amount.toLocaleString()}</span></div></div>`;
         finalOrderDetailsDiv.innerHTML = summaryHtml;
         confirmationOrderDetailsDiv.innerHTML = summaryHtml;
-
         showStep(3);
     });
 
-    paymentRadios.forEach(radio => {
-        radio.addEventListener('change', () => {
-            bankTransferDetails.classList.toggle('hidden', radio.value !== 'bank-transfer');
-            promptpayDetails.classList.toggle('hidden', radio.value !== 'promptpay');
+    paymentRadios.forEach(radio => { radio.addEventListener('change', () => { bankTransferDetails.classList.toggle('hidden', radio.value !== 'bank-transfer'); promptpayDetails.classList.toggle('hidden', radio.value !== 'promptpay'); }); });
+
+    processPaymentBtn.addEventListener('click', () => {
+        Swal.fire({
+            title: 'ยืนยันการชำระเงิน',
+            text: "คุณได้ทำการโอนเงิน/ชำระเงินเรียบร้อยแล้วใช่หรือไม่?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4ade80', // green-400
+            cancelButtonColor: '#f87171', // red-400
+            confirmButtonText: 'ใช่, ชำระแล้ว',
+            cancelButtonText: 'ยังไม่'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                state.order.payment_method = document.querySelector('input[name="payment"]:checked').value;
+                showStep(4);
+            }
         });
     });
 
-    processPaymentBtn.addEventListener('click', () => {
-        state.order.payment_method = document.querySelector('input[name="payment"]:checked').value;
-        showStep(4);
-    });
-
-    paymentSlipInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                previewImage.src = event.target.result;
-                fileNameSpan.textContent = file.name;
-                uploadArea.classList.add('hidden');
-                uploadPreview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-
-    window.clearUpload = () => {
-        paymentSlipInput.value = '';
-        uploadArea.classList.remove('hidden');
-        uploadPreview.classList.add('hidden');
-    };
-
+    paymentSlipInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (event) => { previewImage.src = event.target.result; fileNameSpan.textContent = file.name; uploadArea.classList.add('hidden'); uploadPreview.classList.remove('hidden'); }; reader.readAsDataURL(file); } });
+    window.clearUpload = () => { paymentSlipInput.value = ''; uploadArea.classList.remove('hidden'); uploadPreview.classList.add('hidden'); };
+    
     paymentConfirmationForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        state.order.payment_confirmation = { transfer_amount: document.getElementById('transferAmount').value, transfer_date: document.getElementById('transferDate').value, transfer_time: document.getElementById('transferTime').value, from_bank: document.getElementById('fromBank').value, from_account_name: document.getElementById('fromAccountName').value, slip_file: paymentSlipInput.files[0] };
+
+        // --- Validation for required fields ---
+        const slipFile = paymentSlipInput.files[0];
+        const transferAmount = document.getElementById('transferAmount').value.trim();
+        const transferDate = document.getElementById('transferDate').value.trim();
+        const transferTime = document.getElementById('transferTime').value.trim();
+
+        const otherFieldsEmpty = !transferAmount || !transferDate || !transferTime;
+
+        if (!slipFile && otherFieldsEmpty) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ข้อมูลไม่ครบถ้วน',
+                text: 'กรุณากรอกข้อมูลและแนบสลิปการโอนเงินให้ครบถ้วนครับ'
+            });
+            return;
+        } else if (!slipFile) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ยังไม่ได้แนบสลิป',
+                text: 'กรุณาแนบสลิปการโอนเงินเพื่อใช้ในการยืนยันครับ'
+            });
+            return;
+        } else if (otherFieldsEmpty) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'ข้อมูลไม่ครบถ้วน',
+                text: 'กรุณากรอกจำนวนเงิน, วันที่, และเวลาที่โอนให้ครบถ้วนครับ'
+            });
+            return;
+        }
+        // --- End Validation ---
+
+        state.order.payment_confirmation = { transfer_amount: transferAmount, transfer_date: transferDate, transfer_time: transferTime, from_bank: document.getElementById('fromBank').value, from_account_name: document.getElementById('fromAccountName').value, slip_file: slipFile };
         const finalFormData = new FormData();
         finalFormData.append('order_data', JSON.stringify({ items: state.order.items, customer: state.order.customer, payment_method: state.order.payment_method, total_amount: state.order.total_amount, discount_amount: state.order.discount_amount, final_amount: state.order.final_amount }));
         finalFormData.append('payment_confirmation_data', JSON.stringify({ transfer_amount: state.order.payment_confirmation.transfer_amount, transfer_date: state.order.payment_confirmation.transfer_date, transfer_time: state.order.payment_confirmation.transfer_time, from_bank: state.order.payment_confirmation.from_bank, from_account_name: state.order.payment_confirmation.from_account_name }));
-        if (state.order.payment_confirmation.slip_file) {
-            finalFormData.append('slip_file', state.order.payment_confirmation.slip_file);
-        }
+        if (state.order.payment_confirmation.slip_file) { finalFormData.append('slip_file', state.order.payment_confirmation.slip_file); }
+        
         fetch('api/create_order.php', { method: 'POST', body: finalFormData })
         .then(response => response.json())
         .then(data => {
@@ -450,51 +407,41 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalOrderNumberSpan.textContent = data.order_id;
                 showStep(5);
             } else {
-                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + data.message);
+                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: data.message });
             }
         })
         .catch(error => {
             console.error('Error submitting order:', error);
-            alert('เกิดข้อผิดพลาดร้ายแรง ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้');
+            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้' });
         });
     });
+
+    nextStep1Btn.addEventListener('click', () => {
+        const isShirtSelected = shirtCheckbox.checked;
+        const selectedSize = document.querySelector('input[name="size"]:checked');
+        if (isShirtSelected && !selectedSize) {
+            Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกไซส์เสื้อก่อนดำเนินการต่อครับ' });
+            return;
+        }
+        showStep(2);
+    });
+
+    document.body.addEventListener('change', (e) => { if (e.target.matches('input[name="size"]')) { document.querySelectorAll('#sizeSelection label').forEach(label => { label.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); label.classList.add('border-gray-200'); }); const selectedLabel = e.target.parentElement; if (selectedLabel) { selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); selectedLabel.classList.remove('border-gray-200'); } updatePrice(); } });
+    document.getElementById('transferDate').valueAsDate = new Date();
 
     const init = () => {
         productsTab.addEventListener('click', switchToProductsView);
         newOrderTab.addEventListener('click', () => switchToNewOrder());
         viewOrdersTab.addEventListener('click', switchToOrdersView);
+        statusFilterSelect.addEventListener('change', loadAndRenderOrders);
+        searchOrderInput.addEventListener('keyup', () => {
+            clearTimeout(state.ordersDebounceTimeout);
+            state.ordersDebounceTimeout = setTimeout(loadAndRenderOrders, 500);
+        });
         if(braceletCheckbox) braceletCheckbox.addEventListener('change', handleProductSelection);
         if(shirtCheckbox) shirtCheckbox.addEventListener('change', handleProductSelection);
-        braceletQtyInput.addEventListener('change', () => updateQuantity('bracelet', 0));
-        shirtQtyInput.addEventListener('change', () => updateQuantity('shirt', 0));
-        document.body.addEventListener('change', (e) => {
-            if (e.target.matches('input[name="size"]')) {
-                document.querySelectorAll('#sizeSelection label').forEach(label => {
-                    label.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300');
-                    label.classList.add('border-gray-200');
-                });
-                const selectedLabel = e.target.parentElement;
-                if (selectedLabel) {
-                    selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300');
-                    selectedLabel.classList.remove('border-gray-200');
-                }
-                updatePrice();
-            }
-        });
-        nextStep1Btn.addEventListener('click', () => {
-            const isShirtSelected = shirtCheckbox.checked;
-            const selectedSize = document.querySelector('input[name="size"]:checked');
-            if (isShirtSelected && !selectedSize) {
-                alert('กรุณาเลือกไซส์เสื้อก่อนดำเนินการต่อครับ');
-                return;
-            }
-            showStep(2);
-        });
         switchToProductsView();
-        bankTransferDetails.classList.remove('hidden');
-        promptpayDetails.classList.add('hidden');
-        document.getElementById('transferDate').valueAsDate = new Date();
-        loadProductsAndRender(); // Load products on initial start
+        loadProductsAndRender();
     };
 
     init();
