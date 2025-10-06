@@ -73,7 +73,7 @@
             const formData = new FormData(this);
             const errorMessage = document.getElementById('errorMessage');
 
-            fetch('../api/admin_auth.php', {
+            fetch('../api/admin/admin_auth.php', {
                 method: 'POST',
                 body: formData
             })

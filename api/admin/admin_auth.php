@@ -1,6 +1,13 @@
 <?php
 session_start();
-require_once 'db_connect.php';
+require_once '../shared/db_connect.php';
+
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
 
 header('Content-Type: application/json');
 

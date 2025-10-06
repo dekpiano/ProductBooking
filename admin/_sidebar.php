@@ -41,6 +41,20 @@
             <span>คำสั่งซื้อ</span></a>
     </li>
 
+    <!-- Nav Item - Contacts -->
+    <li class="nav-item">
+        <a class="nav-link" href="contacts.php">
+            <i class="fas fa-fw fa-address-book"></i>
+            <span>ผู้ติดต่อ</span></a>
+    </li>
+
+    <!-- Nav Item - Payment Methods -->
+    <li class="nav-item">
+        <a class="nav-link" href="payment_methods.php">
+            <i class="fas fa-fw fa-money-check-alt"></i>
+            <span>วิธีชำระเงิน</span></a>
+    </li>
+
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

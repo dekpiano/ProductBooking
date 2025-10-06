@@ -1,9 +1,16 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once 'db_connect.php';
+require_once '../shared/db_connect.php';
 
 $response = ['success' => false, 'message' => ''];
+
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
 
 if (!isset($_SESSION['admin_id'])) {
     $response['message'] = 'Unauthorized access.';

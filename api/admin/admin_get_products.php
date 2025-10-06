@@ -1,9 +1,16 @@
 <?php
 session_start();
 header('Content-Type: application/json');
-require_once 'db_connect.php';
+require_once '../shared/db_connect.php';
 
 $response = ['success' => false, 'message' => '', 'products' => []];
+
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
 
 if (!isset($_SESSION['admin_id'])) {
     $response['message'] = 'Unauthorized access.';
@@ -19,11 +26,12 @@ try {
         $stmt->bind_param("i", $productId);
         $stmt->execute();
         $result = $stmt->get_result();
-        if ($result->num_rows === 1) {
+        if ($product = $result->fetch_assoc()) {
             $response['success'] = true;
-            $response['products'][] = $result->fetch_assoc();
+            $response['products'][] = $product;
         } else {
             $response['message'] = 'Product not found.';
+            $response['success'] = false;
         }
         $stmt->close();
     } else {

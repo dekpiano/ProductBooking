@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (productsTable.length === 0) return;
 
         try {
-            const response = await fetch('../api/admin_get_products.php');
+            const response = await fetch('../api/admin/admin_get_products.php');
             const data = await response.json();
 
             if (data.success) {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (ordersTable.length === 0) return;
 
         try {
-            const response = await fetch('../api/admin_get_orders.php');
+            const response = await fetch('../api/admin/admin_get_orders.php');
             const data = await response.json();
 
             if (data.success) {
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $(productsTableBody).on('click', '.edit-btn', async function() {
             const productId = $(this).data('id');
             try {
-                const response = await fetch(`../api/admin_get_products.php?id=${productId}`);
+                const response = await fetch(`../api/admin/admin_get_products.php?id=${productId}`);
                 const data = await response.json();
 
                 if (data.success && data.products.length > 0) {
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
 
             const formData = new FormData(this);
-            const url = productIdInput.value ? '../api/admin_update_product.php' : '../api/admin_create_product.php';
+            const url = productIdInput.value ? '../api/admin/admin_update_product.php' : '../api/admin/admin_create_product.php';
 
             formData.append('colors', document.getElementById('colors').value);
             formData.append('material', document.getElementById('material').value); // Add material
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch('../api/admin_delete_product.php', {
+                        const response = await fetch('../api/admin/admin_delete_product.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $(ordersTableBody).on('click', '.view-slip-btn', async function() {
             const orderId = $(this).data('orderId');
             try {
-                const response = await fetch(`../api/admin_get_orders.php?order_id=${orderId}`);
+                const response = await fetch(`../api/admin/admin_get_order_details.php?order_id=${orderId}`);
                 const data = await response.json();
 
                 if (data.success && data.orders.length > 0) {
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch('../api/admin_approve_order.php', {
+                        const response = await fetch('../api/admin/admin_approve_order.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     try {
-                        const response = await fetch('../api/admin_approve_order.php', {
+                        const response = await fetch('../api/admin/admin_approve_order.php', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded',

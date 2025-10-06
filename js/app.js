@@ -18,12 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const productsView = document.getElementById('productsView');
     const newOrderView = document.getElementById('newOrderView');
     const ordersView = document.getElementById('ordersView');
-    const allViews = [productsView, newOrderView, ordersView];
+    const contactView = document.getElementById('contactView');
+    const allViews = [productsView, newOrderView, ordersView, contactView];
 
     const productsTab = document.getElementById('productsTab');
     const newOrderTab = document.getElementById('newOrderTab');
     const viewOrdersTab = document.getElementById('viewOrdersTab');
-    const allTabs = [productsTab, newOrderTab, viewOrdersTab];
+    const contactTab = document.getElementById('contactTab');
+    const allTabs = [productsTab, newOrderTab, viewOrdersTab, contactTab];
 
     const steps = [
         document.getElementById('step1'),
@@ -53,6 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const ordersTableBody = document.getElementById('ordersTableBody');
     const emptyStateDiv = document.getElementById('emptyState');
     const lastUpdateSpan = document.getElementById('lastUpdate');
+
+    // Contact View Elements
+    const contactListContainer = document.getElementById('contact-list-container');
 
     // Other elements
     const customerForm = document.getElementById('customerForm');
@@ -219,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadProductsAndRender = async () => {
         const container = document.getElementById('product-list-container');
         try {
-            const response = await fetch('api/get_products.php');
+            const response = await fetch('api/public/get_products.php');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             if (data.success && data.products.length > 0) {
@@ -241,7 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ordersTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
 
         try {
-            const response = await fetch(`api/get_orders.php?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}`);
+            const response = await fetch(`api/public/get_orders.php?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}`);
             const data = await response.json();
 
             if (data.success) {
@@ -282,6 +287,39 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Failed to load orders:', error);
             ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
         }
+    };
+
+    const fetchContacts = async () => {
+        contactListContainer.innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">กำลังโหลดข้อมูลการติดต่อ...</p>';
+        try {
+            const response = await fetch('api/public/get_contacts.php');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            if (data.success && data.contacts.length > 0) {
+                renderContacts(data.contacts);
+            } else {
+                contactListContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">ไม่พบข้อมูลการติดต่อ</p>`;
+            }
+        } catch (error) {
+            console.error('Failed to load contacts:', error);
+            contactListContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">ไม่สามารถโหลดข้อมูลการติดต่อได้ กรุณาตรวจสอบการเชื่อมต่อและลองอีกครั้ง</p>`;
+        }
+    };
+
+    const renderContacts = (contacts) => {
+        let html = '';
+        contacts.forEach(contact => {
+            html += `
+                <div class="bg-gray-50 rounded-lg p-4 flex items-center space-x-4 shadow-sm">
+                    <div class="text-2xl text-purple-600"><i class="${contact.icon}"></i></div>
+                    <div>
+                        <div class="font-semibold text-gray-800">${contact.name}</div>
+                        <div class="text-gray-600">${contact.value}</div>
+                    </div>
+                </div>
+            `;
+        });
+        contactListContainer.innerHTML = html;
     };
 
     // --- Core Logic & Event Listeners ---
@@ -330,6 +368,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTabs(viewOrdersTab);
         showView(ordersView);
         loadAndRenderOrders();
+    };
+
+    window.switchToContactView = () => {
+        state.currentView = 'contact';
+        updateTabs(contactTab);
+        showView(contactView);
+        fetchContacts();
     };
 
     window.goBackToStep1 = () => showStep(1);
@@ -431,7 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
         finalFormData.append('payment_confirmation_data', JSON.stringify({ transfer_amount: state.order.payment_confirmation.transfer_amount, transfer_date: state.order.payment_confirmation.transfer_date, transfer_time: state.order.payment_confirmation.transfer_time, from_bank: state.order.payment_confirmation.from_bank, from_account_name: state.order.payment_confirmation.from_account_name }));
         if (state.order.payment_confirmation.slip_file) { finalFormData.append('slip_file', state.order.payment_confirmation.slip_file); }
         
-        fetch('api/create_order.php', { method: 'POST', body: finalFormData })
+        fetch('api/public/create_order.php', { method: 'POST', body: finalFormData })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -464,6 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         productsTab.addEventListener('click', switchToProductsView);
         newOrderTab.addEventListener('click', () => switchToNewOrder());
         viewOrdersTab.addEventListener('click', switchToOrdersView);
+        contactTab.addEventListener('click', switchToContactView);
         statusFilterSelect.addEventListener('change', loadAndRenderOrders);
         searchOrderInput.addEventListener('keyup', () => {
             clearTimeout(state.ordersDebounceTimeout);

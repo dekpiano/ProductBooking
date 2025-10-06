@@ -1,11 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-// --- Database Configuration ---
-$db_host = 'localhost';
-$db_user = 'root';
-$db_pass = '';
-$db_name = 'skjacth_product_booking';
+require_once '../shared/db_connect.php';
 
 $response = [
     'success' => false,
@@ -13,12 +9,16 @@ $response = [
     'orders' => []
 ];
 
-$conn = null;
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
 
 try {
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    $conn->set_charset("utf8mb4");
+    // The $conn variable should be available from db_connect.php
+    // No need for $conn = null; or mysqli_report(...) here
 
     // --- Get query parameters for filtering and searching ---
     $status_filter = isset($_GET['status']) ? $_GET['status'] : '';

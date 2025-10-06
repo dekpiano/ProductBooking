@@ -78,4 +78,5 @@ include '_head.php';
             </div>
         </div>
     </div>
+    <script src="js/orders.js"></script> <!-- New JS for orders management -->
 <?php include '_footer.php'; ?>

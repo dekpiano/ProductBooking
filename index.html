@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
 </head>
 <body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
@@ -28,6 +29,9 @@
                 <button id="viewOrdersTab" class="px-6 py-3 rounded-md font-semibold transition-colors text-purple-600 hover:bg-purple-50">
                     📋 ดูรายการจอง/ยืนยันการชำระเงิน
                 </button>
+                <button id="contactTab" class="px-6 py-3 rounded-md font-semibold transition-colors text-purple-600 hover:bg-purple-50">
+                    📞 ติดต่อสอบถาม
+                </button>
             </div>
         </div>
 
@@ -40,6 +44,17 @@
             <!-- This container will be filled by JavaScript -->
             <div id="product-list-container">
                 <p class="text-center text-gray-500 py-8">กำลังโหลดรายการสินค้า...</p>
+            </div>
+        </div>
+
+        <!-- Contact View -->
+        <div id="contactView" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">📞 ติดต่อสอบถาม</h2>
+                <p class="text-gray-600">เรายินดีให้บริการและตอบทุกข้อสงสัยของคุณ</p>
+            </div>
+            <div id="contact-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <p class="text-center text-gray-500 py-8 col-span-full">กำลังโหลดข้อมูลการติดต่อ...</p>
             </div>
         </div>
 

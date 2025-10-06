@@ -1,11 +1,14 @@
 <?php
 header('Content-Type: application/json');
 
-// --- Database Configuration ---
-$db_host = 'localhost';
-$db_user = 'root';
-$db_pass = '';
-$db_name = 'skjacth_product_booking';
+require_once '../shared/db_connect.php';
+
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
 
 // --- Response Object ---
 $response = [
@@ -14,17 +17,9 @@ $response = [
     'order_id' => null
 ];
 
-$conn = null; // Initialize connection variable
+// $conn is now available from db_connect.php
 
-try {
-    // --- Database Connection ---
-    // Enable exceptions for mysqli errors
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $conn = new mysqli($db_host, $db_user, $db_pass, $db_name);
-    $conn->set_charset("utf8mb4");
 
-    // --- Start Transaction ---
-    $conn->begin_transaction();
 
     // --- 1. รับและแปลงข้อมูล ---
     if (!isset($_POST['order_data']) || !isset($_POST['payment_confirmation_data'])) {
