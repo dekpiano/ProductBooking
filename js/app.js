@@ -7,11 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
             items: [],
             customer: {},
             payment: {},
+            payment_method_id: null,
             total_amount: 0,
             discount_amount: 0,
             final_amount: 0,
         },
         ordersDebounceTimeout: null,
+        paymentMethods: [],
     };
 
     // --- DOM Elements ---
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const shirtQuantityDiv = document.getElementById('shirtQuantity');
     const braceletQtyInput = document.getElementById('braceletQty');
     const shirtQtyInput = document.getElementById('shirtQty');
+    const genderSelectionDiv = document.getElementById('genderSelection');
     const sizeSelectionDiv = document.getElementById('sizeSelection');
     const comboOptionCheckbox = document.getElementById('comboOption');
     const comboSavingsSpan = document.getElementById('comboSavings');
@@ -68,9 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const paymentConfirmationForm = document.getElementById('paymentConfirmationForm');
     const confirmationOrderDetailsDiv = document.getElementById('confirmationOrderDetails');
     const finalOrderNumberSpan = document.getElementById('finalOrderNumber');
-    const paymentRadios = document.querySelectorAll('input[name="payment"]');
-    const bankTransferDetails = document.getElementById('bankTransferDetails');
-    const promptpayDetails = document.getElementById('promptpayDetails');
     const processPaymentBtn = document.getElementById('processPayment');
     const paymentSlipInput = document.getElementById('paymentSlip');
     const uploadArea = document.getElementById('uploadArea');
@@ -85,14 +85,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const shirt = products.find(p => p.category === 'shirt');
         const combo = products.find(p => p.category === 'combo');
         let html = '';
-        html += '<div class="grid md:grid-cols-3 gap-8 mb-8">';
+        html += '<div class="grid md:grid-cols-2 gap-8 mb-8">';
         if (bracelet) {
             html += `
-            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 flex flex-col">
                 <h3 class="text-2xl font-bold text-purple-800 mb-6 text-center">📿 ${bracelet.name}</h3>
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <div class="text-center mb-4">
-                        ${bracelet.image_url ? `<img src="${bracelet.image_url}" alt="${bracelet.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿</span></div>`}
+                <div class="bg-white rounded-lg p-6 shadow-md flex-grow flex flex-col">
+                    <div class="text-center mb-4 flex-grow">
+                        ${bracelet.image_url ? `<img src="${bracelet.image_url}" alt="${bracelet.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿</span></div>`}
                         <h4 class="text-xl font-semibold text-gray-800 mt-4">${bracelet.name}</h4>
                         <p class="text-gray-600 text-sm mt-2">${bracelet.description}</p>
                     </div>
@@ -112,11 +112,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (shirt) {
              html += `
-             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 flex flex-col">
                 <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">👕 ${shirt.name}</h3>
-                <div class="bg-white rounded-lg p-6 shadow-md">
-                    <div class="text-center mb-4">
-                        ${shirt.image_url ? `<img src="${shirt.image_url}" alt="${shirt.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">👕</span></div>`}
+                <div class="bg-white rounded-lg p-6 shadow-md flex-grow flex flex-col">
+                    <div class="text-center mb-4 flex-grow">
+                        ${shirt.image_url ? `<img src="${shirt.image_url}" alt="${shirt.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">👕</span></div>`}
                         <h4 class="text-xl font-semibold text-gray-800 mt-4">${shirt.name}</h4>
                         <p class="text-gray-600 text-sm mt-2">${shirt.description}</p>
                     </div>
@@ -134,16 +134,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         }
+        html += '</div>';
        
         if (combo && bracelet && shirt) {
             const originalPrice = parseFloat(bracelet.price) + parseFloat(shirt.price);
             const discount = combo.discount_amount ? parseFloat(combo.discount_amount) : originalPrice - parseFloat(combo.price);
             html += `
-            <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 rounded-xl p-2 border-2 border-purple-200 mb-8">
+            <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 rounded-xl p-8 border-2 border-purple-200 mb-8">
                 <div class="text-center">
                     <h3 class="text-2xl font-bold text-purple-800 mb-4">🎁 ${combo.name}</h3>
-                    <div class="bg-white rounded-md p-10 shadow-md inline-block">
-                        ${combo.image_url ? `<img src="${combo.image_url}" alt="${combo.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿+👕</span></div>`}
+                    <div class="bg-white rounded-lg p-6 shadow-lg inline-block">
+                        ${combo.image_url ? `<img src="${combo.image_url}" alt="${combo.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿+👕</span></div>`}
 
                         <h4 class="text-xl font-semibold text-gray-800 mb-2 mt-4">คอมโบพิเศษ</h4>
                         <p class="text-gray-600 mb-4">${combo.description}</p>
@@ -159,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>`;
         }
-         html += '</div>';
         container.innerHTML = html;
     };
 
@@ -197,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const sizeContainer = document.querySelector('#sizeSelection .flex');
                 if(sizeContainer) {
-                    console.log('shirt.sizes in updateNewOrderView:', shirt.sizes); // Debug log
                     const sizesArray = shirt.sizes ? shirt.sizes.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
                     sizeContainer.innerHTML = sizesArray.map(size => `
                         <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
@@ -233,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderProducts(data.products);
                 updateNewOrderView(data.products);
             } else {
-                container.innerHTML = `<p class="text-center text-red-500">Error: ${data.message}</p>`;
+                container.innerHTML = `<p class="text-center text-red-500">Error: ${data.message || 'Could not load products.'}</p>`;
             }
         } catch (error) {
             console.error('Failed to load products:', error);
@@ -386,21 +385,94 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!braceletCheckbox || !shirtCheckbox) return;
         braceletQuantityDiv.classList.toggle('hidden', !braceletCheckbox.checked);
         shirtQuantityDiv.classList.toggle('hidden', !shirtCheckbox.checked);
-        console.log('shirtCheckbox.checked in handleProductSelection:', shirtCheckbox.checked); // Debug log
-        sizeSelectionDiv.classList.toggle('hidden', !shirtCheckbox.checked); // This line controls visibility
+        
+        const isShirtSelected = shirtCheckbox.checked;
+        genderSelectionDiv.classList.toggle('hidden', !isShirtSelected);
+        sizeSelectionDiv.classList.toggle('hidden', !isShirtSelected);
+
+        if (!isShirtSelected) {
+            document.querySelectorAll('input[name="gender"]:checked').forEach(radio => radio.checked = false);
+            document.querySelectorAll('input[name="size"]:checked').forEach(radio => radio.checked = false);
+        }
+
         const isCombo = braceletCheckbox.checked && shirtCheckbox.checked;
         comboOptionCheckbox.checked = isCombo;
         comboOptionCheckbox.disabled = !isCombo;
         updatePrice();
     };
-    window.updateQuantity = (product, change) => { const input = product === 'bracelet' ? braceletQtyInput : shirtQtyInput; let currentValue = parseInt(input.value); currentValue += change; if (currentValue < 1) currentValue = 1; input.value = currentValue; updatePrice(); };
-    const updatePrice = () => { const bracelet = state.productList.find(p => p.category === 'bracelet'); const shirt = state.productList.find(p => p.category === 'shirt'); const combo = state.productList.find(p => p.category === 'combo'); if (!bracelet || !shirt) return; let total = 0; let breakdown = ''; let items = []; const braceletQty = parseInt(braceletQtyInput.value); const shirtQty = parseInt(shirtQtyInput.value); const isBraceletSelected = braceletCheckbox.checked; const isShirtSelected = shirtCheckbox.checked; const isCombo = isBraceletSelected && isShirtSelected && combo; let comboQty = 0; let regularBraceletQty = 0; let regularShirtQty = 0; let discount = 0; if (isCombo) { const discountPerCombo = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price); comboQty = Math.min(braceletQty, shirtQty); regularBraceletQty = braceletQty - comboQty; regularShirtQty = shirtQty - comboQty; discount = comboQty * discountPerCombo; if (comboQty > 0) { const comboFinalPrice = parseFloat(combo.price) * comboQty; total += comboFinalPrice; breakdown += `<div>🎁 ${combo.name} x${comboQty}: <span class="font-semibold">฿${comboFinalPrice.toLocaleString()}</span></div>`; items.push({ product_id: combo.id, product_name: combo.name, quantity: comboQty, unit_price: parseFloat(combo.price), subtotal: comboFinalPrice }); } } else { regularBraceletQty = isBraceletSelected ? braceletQty : 0; regularShirtQty = isShirtSelected ? shirtQty : 0; } if (regularBraceletQty > 0) { const braceletPrice = parseFloat(bracelet.price) * regularBraceletQty; total += braceletPrice; breakdown += `<div>📿 ${bracelet.name} x${regularBraceletQty}: <span class="font-semibold">฿${braceletPrice.toLocaleString()}</span></div>`; items.push({ product_id: bracelet.id, product_name: bracelet.name, quantity: regularBraceletQty, unit_price: parseFloat(bracelet.price), subtotal: braceletPrice }); } if (regularShirtQty > 0) { const shirtPrice = parseFloat(shirt.price) * regularShirtQty; total += shirtPrice; breakdown += `<div>👕 ${shirt.name} x${regularShirtQty}: <span class="font-semibold">฿${shirtPrice.toLocaleString()}</span></div>`; items.push({ product_id: shirt.id, product_name: shirt.name, quantity: regularShirtQty, unit_price: parseFloat(shirt.price), subtotal: shirtPrice }); } if (!isBraceletSelected && !isShirtSelected) { breakdown = '<div>กรุณาเลือกสินค้า</div>'; } priceBreakdownDiv.innerHTML = breakdown; totalPriceSpan.textContent = `฿${total.toLocaleString()}`; state.order.items = items; state.order.total_amount = total + discount; state.order.discount_amount = discount; state.order.final_amount = total; nextStep1Btn.disabled = total <= 0; };
+
+    window.updateQuantity = (product, change) => { 
+        const input = product === 'bracelet' ? braceletQtyInput : shirtQtyInput; 
+        let currentValue = parseInt(input.value); 
+        currentValue += change; 
+        if (currentValue < 1) currentValue = 1; 
+        input.value = currentValue; 
+        updatePrice(); 
+    }; 
+
+    const updatePrice = () => { 
+        const bracelet = state.productList.find(p => p.category === 'bracelet'); 
+        const shirt = state.productList.find(p => p.category === 'shirt'); 
+        const combo = state.productList.find(p => p.category === 'combo'); 
+        if (!bracelet || !shirt) return; 
+        let total = 0; 
+        let breakdown = ''; 
+        let items = []; 
+        const braceletQty = parseInt(braceletQtyInput.value); 
+        const shirtQty = parseInt(shirtQtyInput.value); 
+        const isBraceletSelected = braceletCheckbox.checked; 
+        const isShirtSelected = shirtCheckbox.checked; 
+        const isCombo = isBraceletSelected && isShirtSelected && combo; 
+        let comboQty = 0; 
+        let regularBraceletQty = 0; 
+        let regularShirtQty = 0; 
+        let discount = 0; 
+        if (isCombo) { 
+            const discountPerCombo = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price); 
+            comboQty = Math.min(braceletQty, shirtQty); 
+            regularBraceletQty = braceletQty - comboQty; 
+            regularShirtQty = shirtQty - comboQty; 
+            discount = comboQty * discountPerCombo; 
+            if (comboQty > 0) { 
+                const comboFinalPrice = parseFloat(combo.price) * comboQty; 
+                total += comboFinalPrice; 
+                breakdown += `<div>🎁 ${combo.name} x${comboQty}: <span class="font-semibold">฿${comboFinalPrice.toLocaleString()}</span></div>`; 
+                items.push({ product_id: combo.id, product_name: combo.name, quantity: comboQty, unit_price: parseFloat(combo.price), subtotal: comboFinalPrice }); 
+            } 
+        } else { 
+            regularBraceletQty = isBraceletSelected ? braceletQty : 0; 
+            regularShirtQty = isShirtSelected ? shirtQty : 0; 
+        } 
+        if (regularBraceletQty > 0) { 
+            const braceletPrice = parseFloat(bracelet.price) * regularBraceletQty; 
+            total += braceletPrice; 
+            breakdown += `<div>📿 ${bracelet.name} x${regularBraceletQty}: <span class="font-semibold">฿${braceletPrice.toLocaleString()}</span></div>`; 
+            items.push({ product_id: bracelet.id, product_name: bracelet.name, quantity: regularBraceletQty, unit_price: parseFloat(bracelet.price), subtotal: braceletPrice }); 
+        } 
+        if (regularShirtQty > 0) { 
+            const shirtPrice = parseFloat(shirt.price) * regularShirtQty; 
+            total += shirtPrice; 
+            breakdown += `<div>👕 ${shirt.name} x${regularShirtQty}: <span class="font-semibold">฿${shirtPrice.toLocaleString()}</span></div>`; 
+            items.push({ product_id: shirt.id, product_name: shirt.name, quantity: regularShirtQty, unit_price: parseFloat(shirt.price), subtotal: shirtPrice }); 
+        } 
+        if (breakdown === '') { 
+            breakdown = '<div>กรุณาเลือกสินค้า</div>'; 
+            nextStep1Btn.disabled = true; 
+        } else { 
+            nextStep1Btn.disabled = false; 
+        } 
+        priceBreakdownDiv.innerHTML = breakdown; 
+        totalPriceSpan.textContent = `฿${total.toLocaleString()}`; 
+        state.order.items = items; 
+        state.order.total_amount = total + discount; 
+        state.order.discount_amount = discount; 
+        state.order.final_amount = total; 
+    }; 
     
     const paymentOptionsContainer = document.getElementById('paymentOptionsContainer');
     const paymentDetailsContainer = document.getElementById('paymentDetailsContainer');
 
     const loadPaymentMethods = async () => {
-        // Prevent re-loading
         if (state.paymentMethods && state.paymentMethods.length > 0) {
             if (state.paymentMethods.length > 0) {
                 const firstPaymentMethodId = state.paymentMethods[0].id;
@@ -484,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="text-center">
                             <div class="bg-white p-6 rounded-lg border inline-block">
                                 ${method.qr_code_image ?
-                                    `<img src="${method.qr_code_image}" alt="QR Code for ${method.name}" class="w-64 h-100 object-contain mx-auto mb-4">` :
+                                    `<img src="${method.qr_code_image}" alt="QR Code for ${method.name}" class="w-48 h-48 object-contain mx-auto mb-4">` :
                                     `<div class="w-48 h-48 bg-gray-200 flex items-center justify-center mx-auto mb-4 rounded-lg"><span class="text-gray-500">ไม่มี QR Code</span></div>`
                                 }
                                 <div class="text-sm text-gray-600">หมายเลขพร้อมเพย์</div>
@@ -512,21 +584,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     customerForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const selectedSize = document.querySelector('input[name="size"]:checked');
-        if (shirtCheckbox.checked && !selectedSize) {
-            Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกไซส์เสื้อ' });
-            return;
-        }
+        
         state.order.customer = { first_name: firstNameInput.value, last_name: lastNameInput.value, phone: phoneInput.value };
-        if (selectedSize) { const shirt = state.productList.find(p => p.category === 'shirt'); const combo = state.productList.find(p => p.category === 'combo'); const shirtItem = state.order.items.find(item => shirt && item.product_id === shirt.id); const comboItem = state.order.items.find(item => combo && item.product_id === combo.id); if(shirtItem) shirtItem.size = selectedSize.value; if(comboItem) comboItem.size = selectedSize.value; }
+        
+        const selectedGender = document.querySelector('input[name="gender"]:checked');
+        const selectedSize = document.querySelector('input[name="size"]:checked');
+        if (shirtCheckbox.checked && selectedGender && selectedSize) {
+            const shirt = state.productList.find(p => p.category === 'shirt');
+            const combo = state.productList.find(p => p.category === 'combo');
+            const shirtItem = state.order.items.find(item => (shirt && item.product_id === shirt.id) || (combo && item.product_id === combo.id));
+            
+            if(shirtItem) {
+                shirtItem.gender = selectedGender.value === 'male' ? 'ชาย' : 'หญิง';
+                shirtItem.size = selectedSize.value;
+            }
+        }
+
         let summaryHtml = `<div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-600">ลูกค้า:</span> <span class="font-semibold">${state.order.customer.first_name} ${state.order.customer.last_name}</span></div><div class="flex justify-between"><span class="text-gray-600">เบอร์โทร:</span> <span class="font-semibold">${state.order.customer.phone}</span></div><div class="border-t my-2"></div>`;
-        state.order.items.forEach(item => { summaryHtml += `<div class="flex justify-between"><span>${item.product_name} x${item.quantity} ${item.size ? `(ไซส์ ${item.size})` : ''}</span><span class="font-semibold">฿${item.subtotal.toLocaleString()}</span></div>`; });
+        state.order.items.forEach(item => { 
+            let details = '';
+            if (item.gender) {
+                details = ` (${item.gender}, ไซส์ ${item.size})`;
+            } else if (item.size) {
+                details = ` (ไซส์ ${item.size})`;
+            }
+            summaryHtml += `<div class="flex justify-between"><span>${item.product_name} x${item.quantity}${details}</span><span class="font-semibold">฿${item.subtotal.toLocaleString()}</span></div>`; 
+        });
         summaryHtml += `<div class="border-t my-2"></div><div class="flex justify-between text-lg font-bold text-purple-600"><span>ยอดรวมสุทธิ:</span><span>฿${state.order.final_amount.toLocaleString()}</span></div></div>`;
+        
         finalOrderDetailsDiv.innerHTML = summaryHtml;
         confirmationOrderDetailsDiv.innerHTML = summaryHtml;
         
-        loadPaymentMethods(); // Load payment methods before showing step 3
-
+        loadPaymentMethods();
         showStep(3);
     });
 
@@ -542,13 +631,13 @@ document.addEventListener('DOMContentLoaded', () => {
             text: "คุณได้ทำการโอนเงิน/ชำระเงินเรียบร้อยแล้วใช่หรือไม่?",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#4ade80', // green-400
-            cancelButtonColor: '#f87171', // red-400
+            confirmButtonColor: '#4ade80',
+            cancelButtonColor: '#f87171',
             confirmButtonText: 'ใช่, ชำระแล้ว',
             cancelButtonText: 'ยังไม่'
         }).then((result) => {
             if (result.isConfirmed) {
-                state.order.payment_method = selectedRadio.dataset.name;
+                state.order.payment_method_id = selectedRadio.value;
                 showStep(4);
             }
         });
@@ -560,7 +649,6 @@ document.addEventListener('DOMContentLoaded', () => {
     paymentConfirmationForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // --- Validation for required fields ---
         const slipFile = paymentSlipInput.files[0];
         const transferAmount = document.getElementById('transferAmount').value.trim();
         const transferDate = document.getElementById('transferDate').value.trim();
@@ -569,32 +657,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const otherFieldsEmpty = !transferAmount || !transferDate || !transferTime;
 
         if (!slipFile && otherFieldsEmpty) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ข้อมูลไม่ครบถ้วน',
-                text: 'กรุณากรอกข้อมูลและแนบสลิปการโอนเงินให้ครบถ้วนครับ'
-            });
+            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกข้อมูลและแนบสลิปการโอนเงินให้ครบถ้วนครับ' });
             return;
         } else if (!slipFile) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ยังไม่ได้แนบสลิป',
-                text: 'กรุณาแนบสลิปการโอนเงินเพื่อใช้ในการยืนยันครับ'
-            });
+            Swal.fire({ icon: 'warning', title: 'ยังไม่ได้แนบสลิป', text: 'กรุณาแนบสลิปการโอนเงินเพื่อใช้ในการยืนยันครับ' });
             return;
         } else if (otherFieldsEmpty) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ข้อมูลไม่ครบถ้วน',
-                text: 'กรุณากรอกจำนวนเงิน, วันที่, และเวลาที่โอนให้ครบถ้วนครับ'
-            });
+            Swal.fire({ icon: 'warning', title: 'ข้อมูลไม่ครบถ้วน', text: 'กรุณากรอกจำนวนเงิน, วันที่, และเวลาที่โอนให้ครบถ้วนครับ' });
             return;
         }
-        // --- End Validation ---
 
         state.order.payment_confirmation = { transfer_amount: transferAmount, transfer_date: transferDate, transfer_time: transferTime, from_bank: document.getElementById('fromBank').value, from_account_name: document.getElementById('fromAccountName').value, slip_file: slipFile };
         const finalFormData = new FormData();
-        finalFormData.append('order_data', JSON.stringify({ items: state.order.items, customer: state.order.customer, payment_method: state.order.payment_method, total_amount: state.order.total_amount, discount_amount: state.order.discount_amount, final_amount: state.order.final_amount }));
+        finalFormData.append('order_data', JSON.stringify({ items: state.order.items, customer: state.order.customer, payment_method_id: state.order.payment_method_id, total_amount: state.order.total_amount, discount_amount: state.order.discount_amount, final_amount: state.order.final_amount }));
         finalFormData.append('payment_confirmation_data', JSON.stringify({ transfer_amount: state.order.payment_confirmation.transfer_amount, transfer_date: state.order.payment_confirmation.transfer_date, transfer_time: state.order.payment_confirmation.transfer_time, from_bank: state.order.payment_confirmation.from_bank, from_account_name: state.order.payment_confirmation.from_account_name }));
         if (state.order.payment_confirmation.slip_file) { finalFormData.append('slip_file', state.order.payment_confirmation.slip_file); }
         
@@ -616,15 +691,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nextStep1Btn.addEventListener('click', () => {
         const isShirtSelected = shirtCheckbox.checked;
-        const selectedSize = document.querySelector('input[name="size"]:checked');
-        if (isShirtSelected && !selectedSize) {
-            Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกไซส์เสื้อก่อนดำเนินการต่อครับ' });
-            return;
+        if (isShirtSelected) {
+            const selectedGender = document.querySelector('input[name="gender"]:checked');
+            if (!selectedGender) {
+                Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกเพศสำหรับเสื้อ' });
+                return;
+            }
+            const selectedSize = document.querySelector('input[name="size"]:checked');
+            if (!selectedSize) {
+                Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกไซส์เสื้อ' });
+                return;
+            }
         }
         showStep(2);
     });
 
-    document.body.addEventListener('change', (e) => { if (e.target.matches('input[name="size"]')) { document.querySelectorAll('#sizeSelection label').forEach(label => { label.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); label.classList.add('border-gray-200'); }); const selectedLabel = e.target.parentElement; if (selectedLabel) { selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); selectedLabel.classList.remove('border-gray-200'); } updatePrice(); } });
+    document.body.addEventListener('change', (e) => { 
+        if (e.target.matches('input[name="size"]')) { 
+            document.querySelectorAll('#sizeSelection label').forEach(label => { 
+                label.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); 
+                label.classList.add('border-gray-200'); 
+            }); 
+            const selectedLabel = e.target.parentElement; 
+            if (selectedLabel) { 
+                selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); 
+                selectedLabel.classList.remove('border-gray-200'); 
+            } 
+            updatePrice(); 
+        } 
+        if (e.target.matches('input[name="gender"]')) { 
+             document.querySelectorAll('input[name="gender"] + span').forEach(span => {
+                span.parentElement.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300');
+                span.parentElement.classList.add('border-gray-200');
+            });
+            const selectedLabel = e.target.parentElement;
+            if (selectedLabel) {
+                selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300');
+                selectedLabel.classList.remove('border-gray-200');
+            }
+        }
+    });
     document.getElementById('transferDate').valueAsDate = new Date();
 
     const init = () => {

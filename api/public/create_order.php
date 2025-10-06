@@ -84,34 +84,53 @@ try {
         throw new Exception('Payment slip is required. Error code: ' . $_FILES['slip_file']['error']);
     }
 
-    // --- 5. บันทึกข้อมูลลง tb_orders ---
+    // --- 5. Look up payment method type ---
+    $paymentMethodType = null;
+    if (isset($orderData['payment_method_id'])) {
+        $stmt_pm = $conn->prepare("SELECT type FROM tb_payment_methods WHERE id = ?");
+        $stmt_pm->bind_param("i", $orderData['payment_method_id']);
+        $stmt_pm->execute();
+        $result_pm = $stmt_pm->get_result();
+        if ($row_pm = $result_pm->fetch_assoc()) {
+            $paymentMethodType = $row_pm['type'];
+        }
+        $stmt_pm->close();
+    }
+
+    if (!$paymentMethodType) {
+        throw new Exception('Invalid or missing Payment Method ID.');
+    }
+
+    // --- 6. บันทึกข้อมูลลง tb_orders ---
     $stmt_order = $conn->prepare(
         "INSERT INTO tb_orders (id, customer_id, total_amount, discount_amount, final_amount, status, payment_method) VALUES (?, ?, ?, ?, ?, 'รอตรวจสอบการชำระเงิน', ?)"
     );
-    $stmt_order->bind_param("siddss", 
+    $stmt_order->bind_param("siddds", 
         $orderId, 
         $customerId, 
         $orderData['total_amount'], 
         $orderData['discount_amount'], 
         $orderData['final_amount'],
-        $orderData['payment_method']
+        $paymentMethodType
     );
     $stmt_order->execute();
     $stmt_order->close();
 
-    // --- 6. บันทึกข้อมูลลง tb_order_items ---
+    // --- 7. บันทึกข้อมูลลง tb_order_items ---
     $stmt_items = $conn->prepare(
-        "INSERT INTO tb_order_items (order_id, product_id, product_name, quantity, unit_price, size, subtotal) VALUES (?, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO tb_order_items (order_id, product_id, product_name, quantity, unit_price, gender, size, subtotal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     );
     foreach ($items as $item) {
+        $gender = isset($item['gender']) ? $item['gender'] : ''; // Default to empty string for non-shirt items
         $size = isset($item['size']) ? $item['size'] : null;
         $productId = isset($item['product_id']) ? $item['product_id'] : null;
-        $stmt_items->bind_param("sisidsd", 
+        $stmt_items->bind_param("sisidssd", 
             $orderId, 
             $productId, 
             $item['product_name'], 
             $item['quantity'], 
             $item['unit_price'], 
+            $gender,
             $size,
             $item['subtotal']
         );
