@@ -26,21 +26,24 @@
     <div class="sidebar-heading">
         จัดการ
     </div>
-
-    <!-- Nav Item - Products -->
-    <li class="nav-item">
-        <a class="nav-link" href="products.php">
-            <i class="fas fa-fw fa-box"></i>
-            <span>สินค้า</span></a>
-    </li>
-
-    <!-- Nav Item - Orders -->
+ <!-- Nav Item - Orders -->
     <li class="nav-item">
         <a class="nav-link" href="orders.php">
             <i class="fas fa-fw fa-clipboard-list"></i>
             <span>คำสั่งซื้อ</span></a>
     </li>
-
+   
+<!-- Heading -->
+    <div class="sidebar-heading">
+        ตั้งต่า
+    </div>
+   
+ <!-- Nav Item - Products -->
+    <li class="nav-item">
+        <a class="nav-link" href="products.php">
+            <i class="fas fa-fw fa-box"></i>
+            <span>สินค้า</span></a>
+    </li>
     <!-- Nav Item - Contacts -->
     <li class="nav-item">
         <a class="nav-link" href="contacts.php">

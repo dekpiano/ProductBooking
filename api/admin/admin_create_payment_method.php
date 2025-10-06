@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            $qr_code_image = '../uploads/promptpay/' . $newFileName; // Path to store in DB
+            $qr_code_image = $newFileName; // Store only the filename in DB
         } else {
             $response['message'] = 'Failed to upload QR Code image.';
             echo json_encode($response);
@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
+        $is_active = 1; // Default to active
         $stmt = $conn->prepare("INSERT INTO tb_payment_methods (name, type, account_name, account_number, bank_name, promptpay_id, qr_code_image, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("sssssssi", $name, $type, $account_name, $account_number, $bank_name, $promptpay_id, $qr_code_image, $is_active);
 

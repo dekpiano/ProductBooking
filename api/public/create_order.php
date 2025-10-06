@@ -1,14 +1,9 @@
 <?php
+error_reporting(0);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
 require_once '../shared/db_connect.php';
-
-// Check if connection failed
-if (!$conn) {
-    $response['message'] = 'Database connection failed.';
-    echo json_encode($response);
-    exit;
-}
 
 // --- Response Object ---
 $response = [
@@ -17,9 +12,17 @@ $response = [
     'order_id' => null
 ];
 
+// Check if connection failed
+if (!$conn) {
+    $response['message'] = 'Database connection failed.';
+    echo json_encode($response);
+    exit;
+}
+
 // $conn is now available from db_connect.php
 
-
+try {
+    $conn->begin_transaction();
 
     // --- 1. รับและแปลงข้อมูล ---
     if (!isset($_POST['order_data']) || !isset($_POST['payment_confirmation_data'])) {
@@ -65,7 +68,7 @@ $response = [
     $slipPathForDb = null;
     $slipFilename = null;
     if (isset($_FILES['slip_file']) && $_FILES['slip_file']['error'] == 0) {
-        $uploadDir = '../uploads/slips/';
+        $uploadDir = '../../uploads/slips/';
         if (!is_dir($uploadDir) || !is_writable($uploadDir)) {
             throw new Exception("Server error: Upload directory does not exist or is not writable.");
         }

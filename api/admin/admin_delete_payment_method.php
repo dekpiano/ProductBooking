@@ -20,16 +20,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $conn->prepare("DELETE FROM tb_payment_methods WHERE id = ?");
-        $stmt->bind_param("i", $id);
+        // Get the image file name before deleting the record
+        $stmt_select = $conn->prepare("SELECT qr_code_image FROM tb_payment_methods WHERE id = ?");
+        $stmt_select->bind_param("i", $id);
+        $stmt_select->execute();
+        $stmt_select->bind_result($qr_code_image);
+        $stmt_select->fetch();
+        $stmt_select->close();
 
-        if ($stmt->execute()) {
+        // Delete the record from the database
+        $stmt_delete = $conn->prepare("DELETE FROM tb_payment_methods WHERE id = ?");
+        $stmt_delete->bind_param("i", $id);
+
+        if ($stmt_delete->execute()) {
             $response['success'] = true;
             $response['message'] = 'Payment method deleted successfully.';
+
+            // If a QR code image exists, delete it from the server
+            if (!empty($qr_code_image)) {
+                $file_path = '../../uploads/promptpay/' . $qr_code_image;
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
+            }
         } else {
-            $response['message'] = 'Failed to delete payment method: ' . $stmt->error;
+            $response['message'] = 'Failed to delete payment method: ' . $stmt_delete->error;
         }
-        $stmt->close();
+        $stmt_delete->close();
     } catch (Exception $e) {
         $response['message'] = 'Error: ' . $e->getMessage();
     } finally {

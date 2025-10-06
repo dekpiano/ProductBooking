@@ -3,577 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบจองสินค้า - ลิสแบน & เสื้อผ้า</title>
+    <title>ระบบจองของที่ระลึก - ลิสแบน & เสื้อผ้า</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+
+    <!-- Google Fonts: Anuphan -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap" rel="stylesheet">
+
+    <style>
+        html, body, [class*="font-"] {
+            font-family: 'Anuphan', sans-serif;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
+<body class="bg-gray-50 font-sans text-gray-800">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 max-w-7xl">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-purple-800 mb-2">🛍️ ระบบจองสินค้า</h1>
-            <p class="text-gray-600">เลือกกำไลข้อมือและเสื้อผ้าที่คุณชื่นชอบ</p>
-        </div>
+        <header class="text-center mb-8 md:mb-12">
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-purple-800 mb-2">ระบบจองของที่ระลึก</h1>
+            <h3 class="text-2xl sm:text-2xl md:text-3xl font-bold text-purple-800 mb-2">"ร้อยดวงใจแห่งรัก" คืนสู่เหย้าชาว จ.ป. จ.ว. และ สกจ.</h3>
+            <p class="text-gray-600 text-base md:text-lg">51 ปี แห่งความภาคภูมิใจ</p>
+        </header>
 
         <!-- Navigation Tabs -->
-        <div class="flex justify-center mb-8">
-            <div class="bg-white rounded-lg p-1 shadow-lg">
-                <button id="productsTab" class="px-6 py-3 rounded-md font-semibold transition-colors bg-purple-600 text-white">
-                    🛍️ ดูสินค้า
+        <nav class="mb-8 md:mb-12">
+            <div class="bg-white rounded-xl p-2 shadow-lg flex flex-col sm:flex-row sm:flex-wrap sm:justify-center gap-2">
+                <button id="productsTab" class="w-full sm:w-auto flex-grow text-center px-4 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out bg-purple-600 text-white">
+                    🛍️ ดูของที่ระลึก
                 </button>
-                <button id="newOrderTab" class="px-6 py-3 rounded-md font-semibold transition-colors text-purple-600 hover:bg-purple-50">
-                    🛒 จองสินค้า
+                <button id="newOrderTab" class="w-full sm:w-auto flex-grow text-center px-4 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out text-purple-600 hover:bg-purple-50">
+                    🛒 จองของที่ระลึก
                 </button>
-                <button id="viewOrdersTab" class="px-6 py-3 rounded-md font-semibold transition-colors text-purple-600 hover:bg-purple-50">
-                    📋 ดูรายการจอง/ยืนยันการชำระเงิน
+                <button id="viewOrdersTab" class="w-full sm:w-auto flex-grow text-center px-4 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out text-purple-600 hover:bg-purple-50">
+                    📋 ดูรายการจอง
                 </button>
-                <button id="contactTab" class="px-6 py-3 rounded-md font-semibold transition-colors text-purple-600 hover:bg-purple-50">
+                <button id="contactTab" class="w-full sm:w-auto flex-grow text-center px-4 py-3 rounded-lg font-semibold transition-colors duration-300 ease-in-out text-purple-600 hover:bg-purple-50">
                     📞 ติดต่อสอบถาม
                 </button>
             </div>
-        </div>
+        </nav>
 
-        <div id="productsView" class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">🛍️ สินค้าของเรา</h2>
-                <p class="text-gray-600">เลือกดูสินค้าคุณภาพดีที่คุณชื่นชอบ</p>
-            </div>
-
-            <!-- This container will be filled by JavaScript -->
-            <div id="product-list-container">
-                <p class="text-center text-gray-500 py-8">กำลังโหลดรายการสินค้า...</p>
-            </div>
-        </div>
-
-        <!-- Contact View -->
-        <div id="contactView" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800 mb-4">📞 ติดต่อสอบถาม</h2>
-                <p class="text-gray-600">เรายินดีให้บริการและตอบทุกข้อสงสัยของคุณ</p>
-            </div>
-            <div id="contact-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <p class="text-center text-gray-500 py-8 col-span-full">กำลังโหลดข้อมูลการติดต่อ...</p>
-            </div>
-        </div>
-
-        <!-- Orders Table View -->
-        <div id="ordersView" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-800">📋 รายการจองสินค้า</h2>
-                <div class="text-sm text-gray-500">อัปเดตล่าสุด: <span id="lastUpdate"></span></div>
-            </div>
-            <div class="alert alert-info mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800">
-                หมายเหตุ: เมื่อสถานะคำสั่งซื้อเปลี่ยนเป็น "ชำระเงินแล้ว" แล้ว สามารถรับสินค้าได้ในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์
-            </div>
-            <!-- Search and Filter   -->
-            <div class="mb-6 flex flex-col md:flex-row gap-4 items-center">
-                <input type="text" id="searchOrder" placeholder="ค้นหาด้วยชื่อ, เบอร์โทร หรือหมายเลขคำสั่งซื้อ..." class="flex-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                <select id="statusFilter" class="w-full md:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    <option value="">ทุกสถานะ</option>
-                    <option value="รอชำระเงิน">รอชำระเงิน</option>
-                    <option value="รอตรวจสอบการชำระเงิน">รอตรวจสอบการชำระเงิน</option>
-                    <option value="ชำระเงินแล้ว">ชำระเงินแล้ว</option>
-                </select>
-            </div>
-
-            <!-- Orders Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50">
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">หมายเลขคำสั่งซื้อ</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ชื่อลูกค้า</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">เบอร์โทร</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">สินค้า</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ยอดรวม</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">สถานะ</th>
-                            <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">วันที่สั่ง</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersTableBody">
-                        <!-- Sample data will be populated here -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Empty state -->
-            <div id="emptyState" class="text-center py-12 hidden">
-                <div class="text-6xl mb-4">📦</div>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีรายการจอง</h3>
-                <p class="text-gray-500 mb-6">เริ่มต้นจองสินค้าแรกของคุณได้เลย</p>
-                <button onclick="switchToNewOrder()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                    🛒 จองสินค้าใหม่
-                </button>
-            </div>
-        </div>
-
-        <!-- New Order View -->
-        <div id="newOrderView" class="hidden">
-            <!-- Step 1: Product Selection -->
-            <div id="step1" class="bg-white rounded-2xl shadow-lg p-8 mb-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
-                เลือกสินค้า
-            </h2>
-            
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Bracelet Selection -->
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">📿 กำไลข้อมือ</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                            <input type="checkbox" id="braceletCheckbox" value="rubber-bracelet" class="mr-3 w-5 h-5 text-purple-500 rounded">
-                            <img id="braceletImage" src="" alt="กำไลข้อมือ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
-                            <div class="flex-1">
-                                <div class="font-medium">กำไลข้อมือยาง</div>
-                                <div class="text-sm text-gray-500">กำไลข้อมือยางคุณภาพดี</div>
-                                <div class="text-purple-600 font-semibold">฿100 / ชิ้น</div>
-                            </div>
-                        </label>
-                        
-                        <!-- Quantity Selection for Bracelet -->
-                        <div id="braceletQuantity" class="mt-3 hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                            <div class="flex items-center space-x-3">
-                                <button type="button" onclick="updateQuantity('bracelet', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
-                                <input type="number" id="braceletQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('bracelet', 0)">
-                                <button type="button" onclick="updateQuantity('bracelet', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
-                                <span class="text-sm text-gray-500">เลือกจำนวนได้ไม่จำกัด</span>
-                            </div>
-                        </div>
-                    </div>
+        <main>
+            <!-- Products View -->
+            <div id="productsView" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">🛍️ ของที่ระลึกของเรา</h2>
+                    <p class="text-gray-600">เลือกดูของที่ระลึกคุณภาพดีที่คุณชื่นชอบ</p>
                 </div>
-
-                <!-- Shirt Selection -->
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-700 mb-4">👕 เสื้อผ้า</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                            <input type="checkbox" id="shirtCheckbox" value="shirt" class="mr-3 w-5 h-5 text-purple-500 rounded">
-                            <img id="shirtImage" src="" alt="เสื้อผ้า" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
-                            <div class="flex-1">
-                                <div class="font-medium">เสื้อผ้า</div>
-                                <div class="text-sm text-gray-500">เสื้อผ้าคุณภาพดี</div>
-                                <div class="text-purple-600 font-semibold">฿300 / ตัว</div>
-                            </div>
-                        </label>
-                        
-                        <!-- Quantity Selection for Shirt -->
-                        <div id="shirtQuantity" class="mt-3 hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                            <div class="flex items-center space-x-3">
-                                <button type="button" onclick="updateQuantity('shirt', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
-                                <input type="number" id="shirtQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('shirt', 0)">
-                                <button type="button" onclick="updateQuantity('shirt', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
-                                <span class="text-sm text-gray-500">เลือกจำนวนได้ไม่จำกัด</span>
-                            </div>
-                        </div>
-                    </div>
+                <div id="product-list-container">
+                    <p class="text-center text-gray-500 py-8">กำลังโหลดรายการของที่ระลึก...</p>
                 </div>
             </div>
 
-            <!-- Size Selection -->
-            <div id="sizeSelection" class="mt-8 hidden">
-                <h3 class="text-lg font-semibold text-gray-700 mb-4">📏 เลือกไซส์เสื้อ</h3>
-                <div class="flex flex-wrap gap-3">
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="XS" class="sr-only">
-                        <span class="font-semibold">XS</span>
-                    </label>
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="S" class="sr-only">
-                        <span class="font-semibold">S</span>
-                    </label>
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="M" class="sr-only">
-                        <span class="font-semibold">M</span>
-                    </label>
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="L" class="sr-only">
-                        <span class="font-semibold">L</span>
-                    </label>
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="XL" class="sr-only">
-                        <span class="font-semibold">XL</span>
-                    </label>
-                    <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="size" value="XXL" class="sr-only">
-                        <span class="font-semibold">XXL</span>
-                    </label>
+            <!-- Contact View -->
+            <div id="contactView" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-4">📞 ติดต่อสอบถาม</h2>
+                    <p class="text-gray-600">เรายินดีให้บริการและตอบทุกข้อสงสัยของคุณ</p>
+                </div>
+                <div id="contact-list-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <p class="text-center text-gray-500 py-8 col-span-full">กำลังโหลดข้อมูลการติดต่อ...</p>
                 </div>
             </div>
 
-            <!-- Combo Option -->
-            <div class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
-                <div class="flex items-center">
-                    <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded" disabled>
-                    <img id="comboImage" src="" alt="คอมโบพิเศษ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
-                    <div class="flex-1">
-                        <div class="font-semibold text-purple-800">🎁 คอมโบพิเศษ: กำไลข้อมือ + เสื้อผ้า</div>
-                        <div class="text-sm text-purple-600">เลือกทั้งสองอย่างเพื่อรับราคาพิเศษ 350 บาท/ชุด! (ลด 50 บาท/ชุด)</div>
-                        <div class="text-sm text-purple-600 mt-1">
-                            <strong>วิธีการคำนวณ:</strong> จำนวนชุดคอมโบ = จำนวนน้อยสุดระหว่างกำไลกับเสื้อ
-                        </div>
-                        <div class="text-lg font-bold text-purple-700 mt-1" id="comboSavings">ประหยัด ฿50</div>
-                    </div>
+            <!-- Orders Table View -->
+            <div id="ordersView" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-800">📋 รายการจองของที่ระลึก</h2>
+                    <div class="text-sm text-gray-500 self-end sm:self-center">อัปเดตล่าสุด: <span id="lastUpdate"></span></div>
                 </div>
-                
-
-            </div>
-
-            <!-- Price Summary -->
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                <div class="text-lg font-semibold text-gray-800">สรุปราคา</div>
-                <div id="priceBreakdown" class="mt-2 space-y-1 text-sm text-gray-600">
-                    <div>กรุณาเลือกสินค้า</div>
+                <div class="alert alert-info mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800">
+                    หมายเหตุ: เมื่อสถานะคำสั่งซื้อเปลี่ยนเป็น "ชำระเงินแล้ว" แล้ว สามารถรับของที่ระลึกได้ในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์
                 </div>
-                <div class="border-t pt-2 mt-2">
-                    <div class="text-xl font-bold text-purple-600">รวม: <span id="totalPrice">฿0</span></div>
+                <div class="mb-6 flex flex-col md:flex-row gap-4 items-center">
+                    <input type="text" id="searchOrder" placeholder="ค้นหาด้วยชื่อ, เบอร์โทร หรือหมายเลขคำสั่งซื้อ..." class="flex-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                    <select id="statusFilter" class="w-full md:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        <option value="">ทุกสถานะ</option>
+                        <option value="รอชำระเงิน">รอชำระเงิน</option>
+                        <option value="รอตรวจสอบการชำระเงิน">รอตรวจสอบการชำระเงิน</option>
+                        <option value="ชำระเงินแล้ว">ชำระเงินแล้ว</option>
+                    </select>
                 </div>
-            </div>
-
-            <div class="flex gap-4 mt-6">
-                <button onclick="switchToProductsView()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                    ← กลับไปดูสินค้า
-                </button>
-                <button id="nextStep1" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" disabled>
-                    ดำเนินการต่อ →
-                </button>
-            </div>
-        </div>
-
-        <!-- Step 2: Customer Information -->
-        <div id="step2" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
-                ข้อมูลลูกค้า
-            </h2>
-            
-            <form id="customerForm" class="space-y-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">ชื่อ</label>
-                        <input type="text" id="firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="กรอกชื่อ">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">นามสกุล</label>
-                        <input type="text" id="lastName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="กรอกนามสกุล">
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50">
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">หมายเลขคำสั่งซื้อ</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ชื่อลูกค้า</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">เบอร์โทร</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ของที่ระลึก</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">ยอดรวม</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">สถานะ</th>
+                                <th class="border border-gray-200 px-4 py-3 text-left font-semibold text-gray-700">วันที่สั่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">เบอร์โทรศัพท์</label>
-                    <input type="tel" id="phone" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="08X-XXX-XXXX">
-                </div>
-
-                <div class="flex gap-4">
-                    <button type="button" onclick="goBackToStep1()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                        ← กลับไปเลือกสินค้า
-                    </button>
-                    <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                        ยืนยันข้อมูล →
+                <div id="emptyState" class="text-center py-12 hidden">
+                    <div class="text-6xl mb-4">📦</div>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีรายการจอง</h3>
+                    <p class="text-gray-500 mb-6">เริ่มต้นจองของที่ระลึกแรกของคุณได้เลย</p>
+                    <button onclick="switchToNewOrder()" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                        🛒 จองของที่ระลึกใหม่
                     </button>
                 </div>
-            </form>
-        </div>
-
-        <!-- Step 3: Payment -->
-        <div id="step3" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">3</span>
-                ชำระเงิน
-            </h2>
-            
-
-            <div id="orderSummary" class="bg-gray-50 rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">สรุปคำสั่งซื้อ</h3>
-                <div id="finalOrderDetails"></div>
             </div>
 
-            <div class="space-y-4">
-                <h3 class="text-lg font-semibold text-gray-700">เลือกวิธีชำระเงิน</h3>
-                
-                <div class="grid md:grid-cols-2 gap-3">
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="payment" value="bank-transfer" class="mr-3 text-purple-500" checked>
-                        <div class="flex-1">
-                            <div class="font-medium">🏦 โอนเงินผ่านธนาคาร</div>
-                            <div class="text-sm text-gray-500">โอนเงินเข้าบัญชีธนาคาร</div>
-                        </div>
-                    </label>
-
-                    <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                        <input type="radio" name="payment" value="promptpay" class="mr-3 text-purple-500">
-                        <div class="flex-1">
-                            <div class="font-medium">📱 พร้อมเพย์</div>
-                            <div class="text-sm text-gray-500">ชำระผ่าน QR Code พร้อมเพย์</div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Payment Details -->
-            <div id="paymentDetails" class="mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
-                <div id="bankTransferDetails">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4">🏦 ข้อมูลการโอนเงิน</h4>
-                    <div class="space-y-3">
-                        <div class="bg-white p-4 rounded-lg border">
-                            <div class="text-sm text-gray-600">ธนาคาร</div>
-                            <div class="font-semibold text-gray-800">ธนาคารกสิกรไทย</div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg border">
-                            <div class="text-sm text-gray-600">เลขที่บัญชี</div>
-                            <div class="font-mono text-lg font-semibold text-gray-800">123-4-56789-0</div>
-                        </div>
-                        <div class="bg-white p-4 rounded-lg border">
-                            <div class="text-sm text-gray-600">ชื่อบัญชี</div>
-                            <div class="font-semibold text-gray-800">นาย ตัวอย่าง ระบบจอง</div>
-                        </div>
-                    </div>
-                    <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
-                        <div class="text-sm text-yellow-800">
-                            💡 <strong>หมายเหตุ:</strong> กรุณาโอนเงินตามจำนวนที่แสดง และเก็บหลักฐานการโอนไว้
-                        </div>
-                    </div>
-                </div>
-
-                <div id="promptpayDetails" class="hidden">
-                    <h4 class="text-lg font-semibold text-blue-800 mb-4">💳 พร้อมเพย์ QR Code</h4>
-                    <div class="text-center">
-                        <div class="bg-white p-6 rounded-lg border inline-block">
-                            <!-- QR Code Placeholder -->
-                            <div class="w-48 h-48 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center mx-auto mb-4">
-                                <div class="text-center">
-                                    <div class="text-4xl mb-2">📱</div>
-                                    <div class="text-sm text-gray-600">QR Code สำหรับ<br>พร้อมเพย์</div>
+            <!-- New Order View -->
+            <div id="newOrderView" class="hidden">
+                <!-- Step 1: Product Selection -->
+                <div id="step1" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
+                        เลือกของที่ระลึก
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">📿 กำไลข้อมือ</h3>
+                            <div class="space-y-3">
+                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
+                                    <input type="checkbox" id="braceletCheckbox" value="rubber-bracelet" class="mr-3 w-5 h-5 text-purple-500 rounded">
+                                    <img id="braceletImage" src="" alt="กำไลข้อมือ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
+                                    <div class="flex-1">
+                                        <div class="font-medium">กำไลข้อมือยาง</div>
+                                        <div class="text-sm text-gray-500">กำไลข้อมือยางคุณภาพดี</div>
+                                        <div class="text-purple-600 font-semibold">฿100 / ชิ้น</div>
+                                    </div>
+                                </label>
+                                <div id="braceletQuantity" class="mt-3 hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
+                                    <div class="flex items-center space-x-3">
+                                        <button type="button" onclick="updateQuantity('bracelet', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
+                                        <input type="number" id="braceletQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('bracelet', 0)">
+                                        <button type="button" onclick="updateQuantity('bracelet', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="text-sm text-gray-600">หมายเลขพร้อมเพย์</div>
-                            <div class="font-mono text-lg font-semibold text-gray-800">0XX-XXX-XXXX</div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">👕 เสื้อผ้า</h3>
+                            <div class="space-y-3">
+                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
+                                    <input type="checkbox" id="shirtCheckbox" value="shirt" class="mr-3 w-5 h-5 text-purple-500 rounded">
+                                    <img id="shirtImage" src="" alt="เสื้อผ้า" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
+                                    <div class="flex-1">
+                                        <div class="font-medium">เสื้อผ้า</div>
+                                        <div class="text-sm text-gray-500">เสื้อผ้าคุณภาพดี</div>
+                                        <div class="text-purple-600 font-semibold">฿300 / ตัว</div>
+                                    </div>
+                                </label>
+                                <div id="shirtQuantity" class="mt-3 hidden">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
+                                    <div class="flex items-center space-x-3">
+                                        <button type="button" onclick="updateQuantity('shirt', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
+                                        <input type="number" id="shirtQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('shirt', 0)">
+                                        <button type="button" onclick="updateQuantity('shirt', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg">
-                        <div class="text-sm text-yellow-800">
-                            💡 <strong>หมายเหตุ:</strong> สแกน QR Code หรือโอนเงินไปยังหมายเลขพร้อมเพย์ข้างต้น
+                    <div id="sizeSelection" class="mt-8 hidden">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-4">📏 เลือกไซส์เสื้อ</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <!-- Sizes will be populated by JS -->
                         </div>
+                    </div>
+                    <div class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded" disabled>
+                            <img id="comboImage" src="" alt="คอมโบพิเศษ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
+                            <div class="flex-1">
+                                <div class="font-semibold text-purple-800">🎁 คอมโบพิเศษ: กำไลข้อมือ + เสื้อผ้า</div>
+                                <div class="text-sm text-purple-600"></div>
+                                <div class="text-sm text-purple-600 mt-1">
+                                    <strong>วิธีการคำนวณ:</strong> จำนวนชุดคอมโบ = จำนวนน้อยสุดระหว่างกำไลกับเสื้อ
+                                </div>
+                                <div class="text-lg font-bold text-purple-700 mt-1" id="comboSavings"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <div class="text-lg font-semibold text-gray-800">สรุปราคา</div>
+                        <div id="priceBreakdown" class="mt-2 space-y-1 text-sm text-gray-600">
+                            <div>กรุณาเลือกของที่ระลึก</div>
+                        </div>
+                        <div class="border-t pt-2 mt-2">
+                            <div class="text-xl font-bold text-purple-600">รวม: <span id="totalPrice">฿0</span></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                        <button onclick="switchToProductsView()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                            ← กลับไปดูของที่ระลึก
+                        </button>
+                        <button id="nextStep1" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed" disabled>
+                            ดำเนินการต่อ →
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <div class="flex gap-4 mt-6">
-                <button onclick="goBackToStep2()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                    ← กลับไปแก้ไขข้อมูล
-                </button>
-                <button id="processPayment" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                    ดำเนินการชำระเงิน 💳
-                </button>
-            </div>
-        </div>
+                <!-- Step 2: Customer Information -->
+                <div id="step2" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
+                        ข้อมูลลูกค้า
+                    </h2>
+                    <form id="customerForm" class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">ชื่อ</label>
+                                <input type="text" id="firstName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="กรอกชื่อ">
+                            </div>
+                            <div>
+                                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">นามสกุล</label>
+                                <input type="text" id="lastName" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="กรอกนามสกุล">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">เบอร์โทรศัพท์</label>
+                            <input type="tel" id="phone" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="08X-XXX-XXXX">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button type="button" onclick="goBackToStep1()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                                ← กลับไปเลือกของที่ระลึก
+                            </button>
+                            <button type="submit" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                                ยืนยันข้อมูล →
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-        <!-- Step 4: Payment Confirmation -->
-        <div id="step4" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">4</span>
-                ยืนยันการชำระเงิน
-            </h2>
-
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
-                    <span class="text-blue-600 text-xl mr-3">💡</span>
-                    <div>
-                        <div class="font-semibold text-blue-800">กรุณาอัปโหลดหลักฐานการโอนเงิน</div>
-                        <div class="text-sm text-blue-700">เพื่อยืนยันการชำระเงินและเร่งการจัดส่งสินค้า</div>
+                <!-- Step 3: Payment -->
+                <div id="step3" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">3</span>
+                        ชำระเงิน
+                    </h2>
+                    <div id="orderSummary" class="bg-gray-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">สรุปคำสั่งซื้อ</h3>
+                        <div id="finalOrderDetails"></div>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-700">เลือกวิธีชำระเงิน</h3>
+                        <div id="paymentOptionsContainer" class="grid md:grid-cols-2 gap-3">
+                            <p class="text-center text-gray-500 py-4 col-span-full">กำลังโหลดวิธีชำระเงิน...</p>
+                        </div>
+                    </div>
+                    <div id="paymentDetailsContainer" class="mt-6"></div>
+                    <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                        <button onclick="goBackToStep2()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                            ← กลับไปแก้ไขข้อมูล
+                        </button>
+                        <button id="processPayment" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                            ดำเนินการชำระเงิน 💳
+                        </button>
                     </div>
                 </div>
-            </div>
 
-            <!-- Order Summary for Reference -->
-            <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 สรุปคำสั่งซื้อ</h3>
-                <div id="confirmationOrderDetails"></div>
-            </div>
-
-            <!-- Payment Confirmation Form -->
-            <form id="paymentConfirmationForm" class="space-y-6">
-                <!-- Slip Upload -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        📎 อัปโหลดสลิปการโอนเงิน <span class="text-red-500">*</span>
-                    </label>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
-                        <input type="file" id="paymentSlip" accept="image/*" class="hidden">
-                        <div id="uploadArea" class="cursor-pointer" onclick="document.getElementById('paymentSlip').click()">
-                            <div class="text-4xl mb-2">📷</div>
-                            <div class="text-gray-600 mb-2">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวาง</div>
-                            <div class="text-sm text-gray-500">รองรับไฟล์: JPG, PNG, PDF (ขนาดไม่เกิน 5MB)</div>
+                <!-- Step 4: Payment Confirmation -->
+                <div id="step4" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">4</span>
+                        ยืนยันการชำระเงิน
+                    </h2>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <span class="text-blue-600 text-xl mr-3">💡</span>
+                            <div>
+                                <div class="font-semibold text-blue-800">กรุณาอัปโหลดหลักฐานการโอนเงิน</div>
+                                <div class="text-sm text-blue-700">เพื่อยืนยันการชำระเงินและเร่งการจัดส่งของที่ระลึก</div>
+                            </div>
                         </div>
-                        <div id="uploadPreview" class="hidden">
-                            <img id="previewImage" class="max-w-xs mx-auto rounded-lg shadow-md" alt="ตัวอย่างสลิป">
-                            <div id="fileName" class="mt-2 text-sm text-gray-600"></div>
-                            <button type="button" onclick="clearUpload()" class="mt-2 text-red-500 hover:text-red-700 text-sm">
-                                🗑️ ลบไฟล์
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">📋 สรุปคำสั่งซื้อ</h3>
+                        <div id="confirmationOrderDetails"></div>
+                    </div>
+                    <form id="paymentConfirmationForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                📎 อัปโหลดสลิปการโอนเงิน <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-2 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-400 transition-colors">
+                                <input type="file" id="paymentSlip" accept="image/*" class="hidden">
+                                <div id="uploadArea" class="cursor-pointer" onclick="document.getElementById('paymentSlip').click()">
+                                    <div class="text-4xl mb-2 text-gray-400">📷</div>
+                                    <div class="text-gray-600 mb-2">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวาง</div>
+                                    <div class="text-sm text-gray-500">รองรับไฟล์: JPG, PNG, PDF (ขนาดไม่เกิน 5MB)</div>
+                                </div>
+                                <div id="uploadPreview" class="hidden">
+                                    <img id="previewImage" class="max-w-xs mx-auto rounded-lg shadow-md" alt="ตัวอย่างสลิป">
+                                    <div id="fileName" class="mt-2 text-sm text-gray-600"></div>
+                                    <button type="button" onclick="clearUpload()" class="mt-2 text-red-500 hover:text-red-700 text-sm font-semibold">
+                                        🗑️ ลบไฟล์
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="transferAmount" class="block text-sm font-medium text-gray-700 mb-2">
+                                    💰 จำนวนเงินที่โอน <span class="text-red-500">*</span>
+                                </label>
+                                <input type="number" id="transferAmount" step="0.01" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label for="transferDate" class="block text-sm font-medium text-gray-700 mb-2">
+                                    📅 วันที่โอน <span class="text-red-500">*</span>
+                                </label>
+                                <input type="date" id="transferDate" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="transferTime" class="block text-sm font-medium text-gray-700 mb-2">
+                                    ⏰ เวลาที่โอน <span class="text-red-500">*</span>
+                                </label>
+                                <input type="time" id="transferTime" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="fromBank" class="block text-sm font-medium text-gray-700 mb-2">
+                                    🏦 ธนาคารที่โอนจาก
+                                </label>
+                                <select id="fromBank" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                                    <option value="">เลือกธนาคาร</option>
+                                    <option value="กสิกรไทย">ธนาคารกสิกรไทย</option>
+                                    <option value="กรุงเทพ">ธนาคารกรุงเทพ</option>
+                                    <option value="กรุงไทย">ธนาคารกรุงไทย</option>
+                                    <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์</option>
+                                    <option value="กรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา</option>
+                                    <option value="ทหารไทยธนชาต">ธนาคารทหารไทยธนชาต</option>
+                                    <option value="ออมสิน">ธนาคารออมสิน</option>
+                                    <option value="อาคารสงเคราะห์">ธนาคารอาคารสงเคราะห์</option>
+                                    <option value="เกียรตินาคินภัทร">ธนาคารเกียรตินาคินภัทร</option>
+                                    <option value="ซีไอเอ็มบี">ธนาคารซีไอเอ็มบี</option>
+                                    <option value="ยูโอบี">ธนาคารยูโอบี</option>
+                                    <option value="แลนด์ แอนด์ เฮ้าส์">ธนาคารแลนด์ แอนด์ เฮ้าส์</option>
+                                    <option value="อื่นๆ">อื่นๆ</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="fromAccountName" class="block text-sm font-medium text-gray-700 mb-2">
+                                👤 ชื่อบัญชีที่โอนจาก
+                            </label>
+                            <input type="text" id="fromAccountName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="ชื่อเจ้าของบัญชีที่โอนเงิน">
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button type="button" onclick="goBackToStep3()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                                ← กลับไปเลือกวิธีชำระ
+                            </button>
+                            <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
+                                ✅ ยืนยันการชำระเงิน
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 5: Success -->
+                <div id="step5" class="bg-white rounded-2xl shadow-lg p-4 md:p-6 lg:p-8 mb-6 hidden">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">✅</div>
+                        <h2 class="text-3xl font-bold text-green-600 mb-4">สำเร็จ!</h2>
+                        <p class="text-gray-600 mb-6">การยืนยันการชำระเงินเสร็จสมบูรณ์แล้ว</p>
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+                            <div class="text-left">
+                                <div class="font-semibold text-green-800 mb-2">หมายเลขคำสั่งซื้อ</div>
+                                <div class="text-2xl font-mono text-green-600" id="finalOrderNumber"></div>
+                                <div class="text-sm text-green-700 mt-2">กรุณาเก็บหมายเลขนี้ไว้เพื่อติดตามสถานะ</div>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-left mb-6">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">สถานะ:</span>
+                                <span class="text-blue-600 font-semibold">รอตรวจสอบการชำระเงิน</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">ระยะเวลาตรวจสอบ:</span>
+                                <span class="font-semibold">6 - 24 ชั่วโมง</span>
+                            </div>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div class="text-sm text-blue-800">
+                                <div class="font-semibold mb-2">📱 ขั้นตอนต่อไป:</div>
+                                <div class="text-left space-y-1">
+                                    <div>1. เราจะตรวจสอบการชำระเงินภายใน 6 - 24 ชั่วโมง</div>
+                                    <div>2. หากข้อมูลถูกต้อง เราจะเปลี่ยนสถานะเป็น "ชำระเงินแล้ว"</div>
+                                    <div>3. ของที่ระลึกสามารถรับในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <button onclick="switchToOrdersView()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                                📋 ดูรายการจองของฉัน
+                            </button>
+                            <button onclick="location.reload()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                                🛒 สั่งซื้อใหม่
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Transfer Details -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            💰 จำนวนเงินที่โอน <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" id="transferAmount" step="0.01" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
-                               placeholder="0.00">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            📅 วันที่โอน <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" id="transferDate" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            ⏰ เวลาที่โอน <span class="text-red-500">*</span>
-                        </label>
-                        <input type="time" id="transferTime" required 
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            🏦 ธนาคารที่โอนจาก
-                        </label>
-                        <select id="fromBank" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                            <option value="">เลือกธนาคาร</option>
-                            <option value="กสิกรไทย">ธนาคารกสิกรไทย</option>
-                            <option value="กรุงเทพ">ธนาคารกรุงเทพ</option>
-                            <option value="กรุงไทย">ธนาคารกรุงไทย</option>
-                            <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์</option>
-                            <option value="กรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา</option>
-                            <option value="ทหารไทยธนชาต">ธนาคารทหารไทยธนชาต</option>
-                            <option value="ออมสิน">ธนาคารออมสิน</option>
-                            <option value="อาคารสงเคราะห์">ธนาคารอาคารสงเคราะห์</option>
-                            <option value="เกียรตินาคินภัทร">ธนาคารเกียรตินาคินภัทร</option>
-                            <option value="ซีไอเอ็มบี">ธนาคารซีไอเอ็มบี</option>
-                            <option value="ยูโอบี">ธนาคารยูโอบี</option>
-                            <option value="แลนด์ แอนด์ เฮ้าส์">ธนาคารแลนด์ แอนด์ เฮ้าส์</option>
-                            <option value="อื่นๆ">อื่นๆ</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Account Details -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        👤 ชื่อบัญชีที่โอนจาก
-                    </label>
-                    <input type="text" id="fromAccountName" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
-                           placeholder="ชื่อเจ้าของบัญชีที่โอนเงิน">
-                </div>
-
-                <!-- Contact Information -->
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 class="font-semibold text-yellow-800 mb-2">📞 ช่องทางติดต่อ</h4>
-                    <div class="text-sm text-yellow-700 space-y-1">
-                        <div>• Line ID: @shopname</div>
-                        <div>• โทร: 02-XXX-XXXX</div>
-                        <div>• Email: support@shopname.com</div>
-                        <div class="mt-2 font-medium">หากมีปัญหาการอัปโหลดสลิป กรุณาติดต่อเราได้ทันที</div>
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <button type="button" onclick="goBackToStep3()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                        ← กลับไปเลือกวิธีชำระ
-                    </button>
-                    <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition-colors">
-                        ✅ ยืนยันการชำระเงิน
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Step 5: Success -->
-        <div id="step5" class="bg-white rounded-2xl shadow-lg p-8 mb-6 hidden">
-            <div class="text-center">
-                <div class="text-6xl mb-4">✅</div>
-                <h2 class="text-3xl font-bold text-green-600 mb-4">สำเร็จ!</h2>
-                <p class="text-gray-600 mb-6">การยืนยันการชำระเงินเสร็จสมบูรณ์แล้ว</p>
-                
-                <div class="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
-                    <div class="text-left">
-                        <div class="font-semibold text-green-800 mb-2">หมายเลขคำสั่งซื้อ</div>
-                        <div class="text-2xl font-mono text-green-600" id="finalOrderNumber"></div>
-                        <div class="text-sm text-green-700 mt-2">กรุณาเก็บหมายเลขนี้ไว้เพื่อติดตามสถานะ</div>
-                    </div>
-                </div>
-
-                <div class="space-y-3 text-left mb-6">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">สถานะ:</span>
-                        <span class="text-blue-600 font-semibold">รอตรวจสอบการชำระเงิน</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">ระยะเวลาตรวจสอบ:</span>
-                        <span class="font-semibold">6 - 24 ชั่วโมง</span>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                    <div class="text-sm text-blue-800">
-                        <div class="font-semibold mb-2">📱 ขั้นตอนต่อไป:</div>
-                        <div class="text-left space-y-1">
-                            <div>1. เราจะตรวจสอบการชำระเงินภายใน 6 - 24 ชั่วโมง</div>
-                            <div>2. หากข้อมูลถูกต้อง เราจะเปลี่ยนสถานะเป็น "ชำระเงินแล้ว"</div>
-                            <div>3. สินค้าสามารถรับในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <button onclick="switchToOrdersView()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        📋 ดูรายการจองของฉัน
-                    </button>
-                    <button onclick="location.reload()" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        🛒 สั่งซื้อใหม่
-                    </button>
-                </div>
             </div>
-        </div>
-        </div>
+        </main>
     </div>
 
     <!-- Payment Details Modal -->
     <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div class="p-6">
-                <!-- Modal Header -->
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-bold text-gray-800">💳 รายละเอียดการชำระเงิน</h3>
                     <button onclick="closePaymentModal()" class="text-gray-500 hover:text-gray-700 text-2xl font-bold">
                         ×
                     </button>
                 </div>
-
-                <!-- Order Information -->
-                <div id="modalOrderInfo" class="bg-gray-50 rounded-lg p-4 mb-6">
-                    <!-- Order details will be populated here -->
-                </div>
-
-                <!-- Payment Information -->
-                <div id="modalPaymentInfo" class="space-y-4">
-                    <!-- Payment details will be populated here -->
-                </div>
-
-                <!-- Action Buttons -->
+                <div id="modalOrderInfo" class="bg-gray-50 rounded-lg p-4 mb-6"></div>
+                <div id="modalPaymentInfo" class="space-y-4"></div>
                 <div class="flex gap-4 mt-6">
                     <button onclick="closePaymentModal()" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
                         ปิด

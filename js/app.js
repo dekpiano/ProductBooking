@@ -85,15 +85,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const shirt = products.find(p => p.category === 'shirt');
         const combo = products.find(p => p.category === 'combo');
         let html = '';
-        html += '<div class="grid md:grid-cols-2 gap-8 mb-8">';
+        html += '<div class="grid md:grid-cols-3 gap-8 mb-8">';
         if (bracelet) {
             html += `
             <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6">
                 <h3 class="text-2xl font-bold text-purple-800 mb-6 text-center">📿 ${bracelet.name}</h3>
                 <div class="bg-white rounded-lg p-6 shadow-md">
                     <div class="text-center mb-4">
-                        ${bracelet.image_url ? `<img src="${bracelet.image_url}" alt="${bracelet.name}" class="w-32 h-32 object-cover rounded-full mx-auto mb-4 product-thumbnail">` : `<div class="w-32 h-32 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full mx-auto mb-4 flex items-center justify-center"><span class="text-4xl">📿</span></div>`}
-                        <h4 class="text-xl font-semibold text-gray-800">${bracelet.name}</h4>
+                        ${bracelet.image_url ? `<img src="${bracelet.image_url}" alt="${bracelet.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿</span></div>`}
+                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${bracelet.name}</h4>
                         <p class="text-gray-600 text-sm mt-2">${bracelet.description}</p>
                     </div>
                     <div class="space-y-3">
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="text-2xl font-bold text-purple-600">฿${parseFloat(bracelet.price).toLocaleString()}</span>
                         </div>
                     </div>
-                    <button onclick="switchToNewOrder('bracelet')" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">ไม่จำจัด จำนวน</button>
+                    <button onclick="switchToNewOrder('bracelet')" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">สั่งจอง</button>
                 </div>
             </div>`;
         }
@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">👕 ${shirt.name}</h3>
                 <div class="bg-white rounded-lg p-6 shadow-md">
                     <div class="text-center mb-4">
-                        ${shirt.image_url ? `<img src="${shirt.image_url}" alt="${shirt.name}" class="w-32 h-32 object-cover rounded-full mx-auto mb-4 product-thumbnail">` : `<div class="w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full mx-auto mb-4 flex items-center justify-center"><span class="text-4xl">👕</span></div>`}
-                        <h4 class="text-xl font-semibold text-gray-800">${shirt.name}</h4>
+                        ${shirt.image_url ? `<img src="${shirt.image_url}" alt="${shirt.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">👕</span></div>`}
+                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${shirt.name}</h4>
                         <p class="text-gray-600 text-sm mt-2">${shirt.description}</p>
                     </div>
                     <div class="space-y-3">
@@ -130,22 +130,22 @@ document.addEventListener('DOMContentLoaded', () => {
                             <span class="text-2xl font-bold text-blue-600">฿${parseFloat(shirt.price).toLocaleString()}</span>
                         </div>
                     </div>
-                    <button onclick="switchToNewOrder('shirt')" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">ไม่จำจัด จำนวน</button>
+                    <button onclick="switchToNewOrder('shirt')" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">สั่งจอง</button>
                 </div>
             </div>`;
         }
-        html += '</div>';
+       
         if (combo && bracelet && shirt) {
             const originalPrice = parseFloat(bracelet.price) + parseFloat(shirt.price);
             const discount = combo.discount_amount ? parseFloat(combo.discount_amount) : originalPrice - parseFloat(combo.price);
             html += `
-            <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 rounded-xl p-8 border-2 border-purple-200 mb-8">
+            <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 rounded-xl p-2 border-2 border-purple-200 mb-8">
                 <div class="text-center">
                     <h3 class="text-2xl font-bold text-purple-800 mb-4">🎁 ${combo.name}</h3>
-                    <div class="bg-white rounded-lg p-6 shadow-lg inline-block">
-                        ${combo.image_url ? `<img src="${combo.image_url}" alt="${combo.name}" class="w-32 h-32 object-cover rounded-full mx-auto mb-4 product-thumbnail">` : `<div class="text-3xl mb-4">📿 + 👕</div>`}
+                    <div class="bg-white rounded-md p-10 shadow-md inline-block">
+                        ${combo.image_url ? `<img src="${combo.image_url}" alt="${combo.name}" class="w-48 h-48 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-48 h-48 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿+👕</span></div>`}
 
-                        <h4 class="text-xl font-semibold text-gray-800 mb-2">คอมโบพิเศษ</h4>
+                        <h4 class="text-xl font-semibold text-gray-800 mb-2 mt-4">คอมโบพิเศษ</h4>
                         <p class="text-gray-600 mb-4">${combo.description}</p>
                         <div class="flex items-center justify-center space-x-4 mb-4">
                             <span class="text-lg text-gray-500 line-through">฿${originalPrice.toLocaleString()}</span>
@@ -154,11 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">ประหยัด ฿${discount.toLocaleString()}!</div>
                     </div>
                     <div class="mt-6">
-                        <button onclick="switchToNewOrder('combo')" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg">ไม่จำจัด จำนวน</button>
+                        <button onclick="switchToNewOrder('combo')" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg transition-colors text-lg">สั่งจอง</button>
                     </div>
                 </div>
             </div>`;
         }
+         html += '</div>';
         container.innerHTML = html;
     };
 
@@ -395,6 +396,120 @@ document.addEventListener('DOMContentLoaded', () => {
     window.updateQuantity = (product, change) => { const input = product === 'bracelet' ? braceletQtyInput : shirtQtyInput; let currentValue = parseInt(input.value); currentValue += change; if (currentValue < 1) currentValue = 1; input.value = currentValue; updatePrice(); };
     const updatePrice = () => { const bracelet = state.productList.find(p => p.category === 'bracelet'); const shirt = state.productList.find(p => p.category === 'shirt'); const combo = state.productList.find(p => p.category === 'combo'); if (!bracelet || !shirt) return; let total = 0; let breakdown = ''; let items = []; const braceletQty = parseInt(braceletQtyInput.value); const shirtQty = parseInt(shirtQtyInput.value); const isBraceletSelected = braceletCheckbox.checked; const isShirtSelected = shirtCheckbox.checked; const isCombo = isBraceletSelected && isShirtSelected && combo; let comboQty = 0; let regularBraceletQty = 0; let regularShirtQty = 0; let discount = 0; if (isCombo) { const discountPerCombo = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price); comboQty = Math.min(braceletQty, shirtQty); regularBraceletQty = braceletQty - comboQty; regularShirtQty = shirtQty - comboQty; discount = comboQty * discountPerCombo; if (comboQty > 0) { const comboFinalPrice = parseFloat(combo.price) * comboQty; total += comboFinalPrice; breakdown += `<div>🎁 ${combo.name} x${comboQty}: <span class="font-semibold">฿${comboFinalPrice.toLocaleString()}</span></div>`; items.push({ product_id: combo.id, product_name: combo.name, quantity: comboQty, unit_price: parseFloat(combo.price), subtotal: comboFinalPrice }); } } else { regularBraceletQty = isBraceletSelected ? braceletQty : 0; regularShirtQty = isShirtSelected ? shirtQty : 0; } if (regularBraceletQty > 0) { const braceletPrice = parseFloat(bracelet.price) * regularBraceletQty; total += braceletPrice; breakdown += `<div>📿 ${bracelet.name} x${regularBraceletQty}: <span class="font-semibold">฿${braceletPrice.toLocaleString()}</span></div>`; items.push({ product_id: bracelet.id, product_name: bracelet.name, quantity: regularBraceletQty, unit_price: parseFloat(bracelet.price), subtotal: braceletPrice }); } if (regularShirtQty > 0) { const shirtPrice = parseFloat(shirt.price) * regularShirtQty; total += shirtPrice; breakdown += `<div>👕 ${shirt.name} x${regularShirtQty}: <span class="font-semibold">฿${shirtPrice.toLocaleString()}</span></div>`; items.push({ product_id: shirt.id, product_name: shirt.name, quantity: regularShirtQty, unit_price: parseFloat(shirt.price), subtotal: shirtPrice }); } if (!isBraceletSelected && !isShirtSelected) { breakdown = '<div>กรุณาเลือกสินค้า</div>'; } priceBreakdownDiv.innerHTML = breakdown; totalPriceSpan.textContent = `฿${total.toLocaleString()}`; state.order.items = items; state.order.total_amount = total + discount; state.order.discount_amount = discount; state.order.final_amount = total; nextStep1Btn.disabled = total <= 0; };
     
+    const paymentOptionsContainer = document.getElementById('paymentOptionsContainer');
+    const paymentDetailsContainer = document.getElementById('paymentDetailsContainer');
+
+    const loadPaymentMethods = async () => {
+        // Prevent re-loading
+        if (state.paymentMethods && state.paymentMethods.length > 0) {
+            if (state.paymentMethods.length > 0) {
+                const firstPaymentMethodId = state.paymentMethods[0].id;
+                const firstRadio = document.querySelector(`input[name="payment"][value="${firstPaymentMethodId}"]`);
+                if (firstRadio) firstRadio.checked = true;
+                showPaymentDetail(firstPaymentMethodId);
+            }
+            return;
+        }
+
+        paymentOptionsContainer.innerHTML = `<p class="text-center text-gray-500 py-4 col-span-full">กำลังโหลดวิธีชำระเงิน...</p>`;
+        try {
+            const response = await fetch('api/public/get_payment_methods.php');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            if (data.success && data.data.length > 0) {
+                state.paymentMethods = data.data;
+                renderPaymentOptions(data.data);
+                renderPaymentDetails(data.data);
+                if (data.data.length > 0) {
+                    const firstPaymentMethodId = data.data[0].id;
+                    document.querySelector(`input[name="payment"][value="${firstPaymentMethodId}"]`).checked = true;
+                    showPaymentDetail(firstPaymentMethodId);
+                }
+            } else {
+                paymentOptionsContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">${data.message || 'ไม่พบช่องทางการชำระเงิน'}</p>`;
+            }
+        } catch (error) {
+            console.error('Failed to load payment methods:', error);
+            paymentOptionsContainer.innerHTML = `<p class="text-center text-red-500 col-span-full">ไม่สามารถโหลดข้อมูลการชำระเงินได้</p>`;
+        }
+    };
+
+    const renderPaymentOptions = (paymentMethods) => {
+        const html = paymentMethods.map((method, index) => `
+            <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
+                <input type="radio" name="payment" value="${method.id}" class="mr-3 text-purple-500" data-name="${method.name}">
+                <div class="flex-1">
+                    <div class="font-medium">${method.type === 'bank_transfer' ? '🏦' : '📱'} ${method.name}</div>
+                </div>
+            </label>
+        `).join('');
+        paymentOptionsContainer.innerHTML = html;
+
+        document.querySelectorAll('input[name="payment"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                showPaymentDetail(e.target.value);
+            });
+        });
+    };
+
+    const renderPaymentDetails = (paymentMethods) => {
+        const html = paymentMethods.map(method => {
+            if (method.type === 'bank_transfer') {
+                return `
+                    <div id="payment-detail-${method.id}" class="payment-detail-view hidden mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-4">🏦 ข้อมูลการโอนเงิน: ${method.name}</h4>
+                        <div class="space-y-3">
+                            <div class="bg-white p-4 rounded-lg border flex justify-between items-center">
+                                <span class="text-sm text-gray-600">ธนาคาร:</span>
+                                <span class="font-semibold text-gray-800">${method.bank_name}</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border flex justify-between items-center">
+                                <span class="text-sm text-gray-600">เลขที่บัญชี:</span>
+                                <span class="font-mono text-lg font-semibold text-gray-800">${method.account_number}</span>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border flex justify-between items-center">
+                                <span class="text-sm text-gray-600">ชื่อบัญชี:</span>
+                                <span class="font-semibold text-gray-800">${method.account_name}</span>
+                            </div>
+                        </div>
+                        <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-sm text-yellow-800">
+                            💡 <strong>หมายเหตุ:</strong> กรุณาโอนเงินตามจำนวนที่แสดง และเก็บหลักฐานการโอนไว้
+                        </div>
+                    </div>
+                `;
+            } else if (method.type === 'promptpay') {
+                return `
+                    <div id="payment-detail-${method.id}" class="payment-detail-view hidden mt-6 p-6 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="text-lg font-semibold text-blue-800 mb-4">💳 พร้อมเพย์: ${method.name}</h4>
+                        <div class="text-center">
+                            <div class="bg-white p-6 rounded-lg border inline-block">
+                                ${method.qr_code_image ?
+                                    `<img src="${method.qr_code_image}" alt="QR Code for ${method.name}" class="w-64 h-100 object-contain mx-auto mb-4">` :
+                                    `<div class="w-48 h-48 bg-gray-200 flex items-center justify-center mx-auto mb-4 rounded-lg"><span class="text-gray-500">ไม่มี QR Code</span></div>`
+                                }
+                                <div class="text-sm text-gray-600">หมายเลขพร้อมเพย์</div>
+                                <div class="font-mono text-lg font-semibold text-gray-800">${method.promptpay_id}</div>
+                            </div>
+                        </div>
+                         <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-sm text-yellow-800">
+                            💡 <strong>หมายเหตุ:</strong> สแกน QR Code หรือโอนเงินไปยังหมายเลขพร้อมเพย์ข้างต้น
+                        </div>
+                    </div>
+                `;
+            }
+            return '';
+        }).join('');
+        paymentDetailsContainer.innerHTML = html;
+    };
+
+    const showPaymentDetail = (paymentMethodId) => {
+        document.querySelectorAll('.payment-detail-view').forEach(view => view.classList.add('hidden'));
+        const detailView = document.getElementById(`payment-detail-${paymentMethodId}`);
+        if (detailView) {
+            detailView.classList.remove('hidden');
+        }
+    };
+
     customerForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const selectedSize = document.querySelector('input[name="size"]:checked');
@@ -409,12 +524,19 @@ document.addEventListener('DOMContentLoaded', () => {
         summaryHtml += `<div class="border-t my-2"></div><div class="flex justify-between text-lg font-bold text-purple-600"><span>ยอดรวมสุทธิ:</span><span>฿${state.order.final_amount.toLocaleString()}</span></div></div>`;
         finalOrderDetailsDiv.innerHTML = summaryHtml;
         confirmationOrderDetailsDiv.innerHTML = summaryHtml;
+        
+        loadPaymentMethods(); // Load payment methods before showing step 3
+
         showStep(3);
     });
 
-    paymentRadios.forEach(radio => { radio.addEventListener('change', () => { bankTransferDetails.classList.toggle('hidden', radio.value !== 'bank-transfer'); promptpayDetails.classList.toggle('hidden', radio.value !== 'promptpay'); }); });
-
     processPaymentBtn.addEventListener('click', () => {
+        const selectedRadio = document.querySelector('input[name="payment"]:checked');
+        if (!selectedRadio) {
+            Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกวิธีชำระเงิน' });
+            return;
+        }
+
         Swal.fire({
             title: 'ยืนยันการชำระเงิน',
             text: "คุณได้ทำการโอนเงิน/ชำระเงินเรียบร้อยแล้วใช่หรือไม่?",
@@ -426,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cancelButtonText: 'ยังไม่'
         }).then((result) => {
             if (result.isConfirmed) {
-                state.order.payment_method = document.querySelector('input[name="payment"]:checked').value;
+                state.order.payment_method = selectedRadio.dataset.name;
                 showStep(4);
             }
         });

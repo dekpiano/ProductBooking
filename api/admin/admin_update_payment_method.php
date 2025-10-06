@@ -29,39 +29,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 
-    // Fetch current qr_code_image if no new image is uploaded
-    $current_qr_code_image = null;
-    if (empty($_FILES['qrCodeImage']) || $_FILES['qrCodeImage']['error'] !== UPLOAD_ERR_OK) {
-        $stmt_fetch_image = $conn->prepare("SELECT qr_code_image FROM tb_payment_methods WHERE id = ?");
-        $stmt_fetch_image->bind_param("i", $id);
-        $stmt_fetch_image->execute();
-        $stmt_fetch_image->bind_result($current_qr_code_image);
-        $stmt_fetch_image->fetch();
-        $stmt_fetch_image->close();
-        $qr_code_image = $current_qr_code_image; // Default to current image_url
-    }
+    // First, get the current image filename from the DB
+    $stmt_fetch_image = $conn->prepare("SELECT qr_code_image FROM tb_payment_methods WHERE id = ?");
+    $stmt_fetch_image->bind_param("i", $id);
+    $stmt_fetch_image->execute();
+    $stmt_fetch_image->bind_result($current_qr_code_image);
+    $stmt_fetch_image->fetch();
+    $stmt_fetch_image->close();
 
-    // Handle QR Code image upload
+    $qr_code_image = $current_qr_code_image; // Assume old image is kept
+
+    // Handle QR Code image upload if a new file is provided
     if (isset($_FILES['qrCodeImage']) && $_FILES['qrCodeImage']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../../uploads/promptpay/'; // Relative path to the uploads directory
+        $uploadDir = '../../uploads/promptpay/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
+        }
+
+        // Delete the old image if it exists
+        if (!empty($current_qr_code_image)) {
+            $oldImagePath = $uploadDir . $current_qr_code_image;
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
         }
 
         $fileTmpPath = $_FILES['qrCodeImage']['tmp_name'];
         $fileName = $_FILES['qrCodeImage']['name'];
         $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-
         $newFileName = 'qrcode_' . md5(time() . $fileName) . '.' . $fileExtension;
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            $qr_code_image = '../uploads/promptpay/' . $newFileName; // Path to store in DB
-
-            // Optional: Delete old image if it exists
-            if ($current_qr_code_image && file_exists('../' . $current_qr_code_image)) {
-                unlink('../../' . $current_qr_code_image);
-            }
+            $qr_code_image = $newFileName; // Store only the new filename in DB
         } else {
             $response['message'] = 'Failed to upload new QR Code image.';
             echo json_encode($response);

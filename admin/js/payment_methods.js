@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${method.account_number || '-'}</td>
                 <td>${method.bank_name || '-'}</td>
                 <td>${method.promptpay_id || '-'}</td>
-                <td>${method.qr_code_image ? `<img src="../${method.qr_code_image}" width="50">` : '-'}</td>
+                <td>${method.qr_code_image ? `<img src="../uploads/promptpay/${method.qr_code_image}" width="50">` : '-'}</td>
                 <td>${method.is_active == 1 ? '<span class="badge badge-success">ใช้งาน</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>'}</td>
                 <td>
                     <button class="btn btn-warning btn-sm edit-btn" data-id="${method.id}">
