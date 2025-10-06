@@ -40,23 +40,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 if ($.fn.DataTable.isDataTable('#productsTable')) {
                     productsTable.DataTable().destroy();
                 }
-                productsTableBody.innerHTML = ''; // Clear existing rows
+                // productsTableBody.innerHTML = ''; // No need to clear innerHTML if using DataTable's data option
 
-                const productsData = data.products.map(product => [
-                    product.id,
-                    product.name,
-                    product.category === 'bracelet' ? 'สร้อยข้อมือ' : product.category === 'shirt' ? 'เสื้อ' : 'ชุดคอมโบ',
-                    parseFloat(product.price).toFixed(2),
-                    product.stock,
-                    product.is_active == 1 ? '<span class="badge badge-success">ใช้งาน</span>' : '<span class="badge badge-danger">ไม่ใช้งาน</span>',
-                    `<button class="btn btn-warning btn-sm edit-btn" data-id="${product.id}"><i class="fas fa-edit"></i> แก้ไข</button>
-                     <button class="btn btn-danger btn-sm delete-btn" data-id="${product.id}"><i class="fas fa-trash"></i> ลบ</button>`
-                ]);
+                const productsData = data.products.map(product => {
+                    const imageUrlHtml = product.image_url ?
+                        `<img src="../${product.image_url}" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;">` :
+                        'ไม่มีรูป';
+                    const statusText = product.is_active == 1 ? 'ใช้งาน' : 'ไม่ใช้งาน';
+                    const actionsHtml = `
+                        <button class="btn btn-info btn-sm edit-btn" data-id="${product.id}">แก้ไข</button>
+                        <button class="btn btn-danger btn-sm delete-btn" data-id="${product.id}">ลบ</button>
+                    `;
+                    return [
+                        product.id,
+                        imageUrlHtml, // Image column
+                        product.name,
+                        product.category,
+                        parseFloat(product.price).toFixed(2),
+                        product.stock,
+                        statusText,
+                        actionsHtml
+                    ];
+                });
 
                 productsDataTable = productsTable.DataTable({
                     data: productsData,
                     columns: [
                         { title: "ID" },
+                        { title: "รูปภาพ" }, // New column for image
                         { title: "ชื่อสินค้า" },
                         { title: "หมวดหมู่" },
                         { title: "ราคา" },
@@ -100,19 +111,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     switch (order.order_status) {
                         case 'รอชำระเงิน': statusBadge = '<span class="badge badge-warning">รอชำระเงิน</span>'; break;
                         case 'รอตรวจสอบการชำระเงิน': statusBadge = '<span class="badge badge-info">รอตรวจสอบการชำระเงิน</span>'; break;
-                        case 'รอจัดส่ง': statusBadge = '<span class="badge badge-primary">รอจัดส่ง</span>'; break;
-                        case 'จัดส่งแล้ว': statusBadge = '<span class="badge badge-secondary">จัดส่งแล้ว</span>'; break;
-                        case 'สำเร็จ': statusBadge = '<span class="badge badge-success">สำเร็จ</span>'; break;
-                        case 'ยกเลิก': statusBadge = '<span class="badge badge-danger">ยกเลิก</span>'; break;
+                        case 'ชำระเงินแล้ว': statusBadge = '<span class="badge badge-success">ชำระเงินแล้ว</span>'; break;
                         default: statusBadge = '<span class="badge badge-light text-dark">ไม่ระบุ</span>';
                     }
 
                     if (order.slip_filename) {
                         actionsHtml += `<button class="btn btn-info btn-sm view-slip-btn mr-2" data-order-id="${order.order_id}"><i class="fas fa-eye"></i> ดูสลิป</button>`;
                     }
-                    if (order.order_status === 'รอตรวจสอบการชำระเงิน' && order.slip_filename) {
+                    // Show approve button only if payment confirmation is 'รอตรวจสอบ'
+                    if (order.payment_confirmation_status === 'รอตรวจสอบ' && order.slip_filename) {
                         actionsHtml += `<button class="btn btn-success btn-sm approve-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-check"></i> อนุมัติ</button>`;
-                    } else if (order.order_status === 'รอจัดส่ง') {
+                    }
+                    // Show unapprove button if order is 'ชำระเงินแล้ว' (meaning it was approved)
+                    else if (order.order_status === 'ชำระเงินแล้ว') {
                         actionsHtml += `<button class="btn btn-danger btn-sm unapprove-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-times"></i> ยกเลิกอนุมัติ</button>`;
                     }
 
@@ -181,7 +192,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     productStockInput.value = product.stock;
                     productIsActiveInput.value = product.is_active;
                     productSizesInput.value = product.sizes || '';
-                    productColorsInput.value = product.colors || '';
+    document.getElementById('colors').value = product && product.colors ? product.colors : '';
+    document.getElementById('material').value = product ? product.material : ''; // Set material
+    document.getElementById('discount_amount').value = product ? product.discount_amount : 0.00; // Set discount_amount
+
+    // Display current image if available
+    const currentProductImageDiv = document.getElementById('currentProductImage');
+    currentProductImageDiv.innerHTML = ''; // Clear previous image
+    if (product && product.image_url) {
+        const img = document.createElement('img');
+        img.src = '../' + product.image_url; // Adjust path as needed
+        img.alt = 'Product Image';
+        img.style.maxWidth = '100px';
+        img.style.maxHeight = '100px';
+        currentProductImageDiv.appendChild(img);
+    }
+
+    // Clear image input when opening modal
+    document.getElementById('productImage').value = '';
                     document.getElementById('productModalLabel').textContent = 'แก้ไขสินค้า';
                     productModalElement.modal('show'); // Show Bootstrap 4 modal
                 } else {
@@ -199,6 +227,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const formData = new FormData(this);
             const url = productIdInput.value ? '../api/admin_update_product.php' : '../api/admin_create_product.php';
+
+            formData.append('colors', document.getElementById('colors').value);
+            formData.append('material', document.getElementById('material').value); // Add material
+            formData.append('discount_amount', document.getElementById('discount_amount').value); // Add discount_amount
+
+            const productImageInput = document.getElementById('productImage');
+            if (productImageInput.files.length > 0) {
+                formData.append('productImage', productImageInput.files[0]); // Add image file
+            }
 
             try {
                 const response = await fetch(url, {

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 04, 2025 at 01:03 PM
+-- Generation Time: Oct 06, 2025 at 05:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -152,9 +152,10 @@ CREATE TABLE `tb_products` (
   `category` enum('bracelet','shirt','combo') NOT NULL COMMENT 'ประเภทสินค้า',
   `price` decimal(10,2) NOT NULL COMMENT 'ราคา',
   `description` text DEFAULT NULL COMMENT 'รายละเอียดสินค้า',
+  `image_url` varchar(255) DEFAULT NULL COMMENT 'URL หรือ Path ของรูปภาพสินค้า',
   `material` varchar(255) DEFAULT NULL COMMENT 'วัสดุ',
-  `sizes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'ไซส์ที่มี (JSON Array)' CHECK (json_valid(`sizes`)),
-  `colors` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'สีที่มี (JSON Array)' CHECK (json_valid(`colors`)),
+  `sizes` longtext DEFAULT NULL COMMENT 'ไซส์ที่มี (Comma Separated)',
+  `colors` longtext DEFAULT NULL COMMENT 'สีที่มี (Comma Separated)',
   `stock` int(11) DEFAULT 0 COMMENT 'จำนวนสต็อก',
   `discount_amount` decimal(10,2) DEFAULT 0.00 COMMENT 'ส่วนลด (สำหรับคอมโบ)',
   `is_active` tinyint(1) DEFAULT 1 COMMENT 'สถานะใช้งาน',

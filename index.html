@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen font-sans">
+<body class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
         <div class="text-center mb-8">
@@ -49,17 +49,17 @@
                 <h2 class="text-2xl font-bold text-gray-800">📋 รายการจองสินค้า</h2>
                 <div class="text-sm text-gray-500">อัปเดตล่าสุด: <span id="lastUpdate"></span></div>
             </div>
-
-            <!-- Search and Filter -->
+            <div class="alert alert-info mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-800">
+                หมายเหตุ: เมื่อสถานะคำสั่งซื้อเปลี่ยนเป็น "ชำระเงินแล้ว" แล้ว สามารถรับสินค้าได้ในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์
+            </div>
+            <!-- Search and Filter   -->
             <div class="mb-6 flex flex-col md:flex-row gap-4 items-center">
                 <input type="text" id="searchOrder" placeholder="ค้นหาด้วยชื่อ, เบอร์โทร หรือหมายเลขคำสั่งซื้อ..." class="flex-1 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                 <select id="statusFilter" class="w-full md:w-auto px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
                     <option value="">ทุกสถานะ</option>
                     <option value="รอชำระเงิน">รอชำระเงิน</option>
                     <option value="รอตรวจสอบการชำระเงิน">รอตรวจสอบการชำระเงิน</option>
-                    <option value="รอจัดส่ง">รอจัดส่ง</option>
-                    <option value="จัดส่งแล้ว">จัดส่งแล้ว</option>
-                    <option value="สำเร็จ">สำเร็จ</option>
+                    <option value="ชำระเงินแล้ว">ชำระเงินแล้ว</option>
                 </select>
             </div>
 
@@ -110,6 +110,7 @@
                     <div class="space-y-3">
                         <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
                             <input type="checkbox" id="braceletCheckbox" value="rubber-bracelet" class="mr-3 w-5 h-5 text-purple-500 rounded">
+                            <img id="braceletImage" src="" alt="กำไลข้อมือ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
                             <div class="flex-1">
                                 <div class="font-medium">กำไลข้อมือยาง</div>
                                 <div class="text-sm text-gray-500">กำไลข้อมือยางคุณภาพดี</div>
@@ -136,6 +137,7 @@
                     <div class="space-y-3">
                         <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
                             <input type="checkbox" id="shirtCheckbox" value="shirt" class="mr-3 w-5 h-5 text-purple-500 rounded">
+                            <img id="shirtImage" src="" alt="เสื้อผ้า" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
                             <div class="flex-1">
                                 <div class="font-medium">เสื้อผ้า</div>
                                 <div class="text-sm text-gray-500">เสื้อผ้าคุณภาพดี</div>
@@ -192,6 +194,7 @@
             <div class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
                 <div class="flex items-center">
                     <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded" disabled>
+                    <img id="comboImage" src="" alt="คอมโบพิเศษ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
                     <div class="flex-1">
                         <div class="font-semibold text-purple-800">🎁 คอมโบพิเศษ: กำไลข้อมือ + เสื้อผ้า</div>
                         <div class="text-sm text-purple-600">เลือกทั้งสองอย่างเพื่อรับราคาพิเศษ 350 บาท/ชุด! (ลด 50 บาท/ชุด)</div>
@@ -268,15 +271,6 @@
                 ชำระเงิน
             </h2>
             
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <div class="flex items-center">
-                    <span class="text-yellow-600 text-xl mr-3">⚠️</span>
-                    <div>
-                        <div class="font-semibold text-yellow-800">หน้าตัวอย่าง (Demo)</div>
-                        <div class="text-sm text-yellow-700">นี่เป็นหน้าตัวอย่างเท่านั้น ไม่สามารถชำระเงินจริงได้</div>
-                    </div>
-                </div>
-            </div>
 
             <div id="orderSummary" class="bg-gray-50 rounded-lg p-6 mb-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-4">สรุปคำสั่งซื้อ</h3>
@@ -514,11 +508,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-600">ระยะเวลาตรวจสอบ:</span>
-                        <span class="font-semibold">1-2 ชั่วโมง</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">ระยะเวลาจัดส่ง:</span>
-                        <span class="font-semibold">3-5 วันทำการ (หลังยืนยันการชำระเงิน)</span>
+                        <span class="font-semibold">6 - 24 ชั่วโมง</span>
                     </div>
                 </div>
 
@@ -526,10 +516,9 @@
                     <div class="text-sm text-blue-800">
                         <div class="font-semibold mb-2">📱 ขั้นตอนต่อไป:</div>
                         <div class="text-left space-y-1">
-                            <div>1. เราจะตรวจสอบการชำระเงินภายใน 1-2 ชั่วโมง</div>
-                            <div>2. หากข้อมูลถูกต้อง เราจะเปลี่ยนสถานะเป็น "รอจัดส่ง"</div>
-                            <div>3. สินค้าจะถูกจัดส่งภายใน 3-5 วันทำการ</div>
-                            <div>4. คุณจะได้รับหมายเลขติดตามพัสดุทาง SMS</div>
+                            <div>1. เราจะตรวจสอบการชำระเงินภายใน 6 - 24 ชั่วโมง</div>
+                            <div>2. หากข้อมูลถูกต้อง เราจะเปลี่ยนสถานะเป็น "ชำระเงินแล้ว"</div>
+                            <div>3. สินค้าสามารถรับในวันที่ 1 พฤศจิกายน 2568 เป็นต้นไป ณ โรงเรียนสวนกุหลาบวิทยาลับ (จิรประวัติ) นครสวรรค์</div>
                         </div>
                     </div>
                 </div>

@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         if ($action === 'approve') {
             // 1. Update order status in tb_orders
-            $stmt_order = $conn->prepare("UPDATE tb_orders SET status = 'รอจัดส่ง' WHERE id = ? AND status = 'รอตรวจสอบการชำระเงิน'");
+            $stmt_order = $conn->prepare("UPDATE tb_orders SET status = 'ชำระเงินแล้ว' WHERE id = ? AND status = 'รอตรวจสอบการชำระเงิน'");
             $stmt_order->bind_param("s", $orderId);
             $stmt_order->execute();
 
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['message'] = 'Payment approved and order status updated successfully.';
         } else if ($action === 'unapprove') {
             // 1. Update order status in tb_orders (revert to 'รอตรวจสอบการชำระเงิน')
-            $stmt_order = $conn->prepare("UPDATE tb_orders SET status = 'รอตรวจสอบการชำระเงิน' WHERE id = ? AND status = 'รอจัดส่ง'");
+            $stmt_order = $conn->prepare("UPDATE tb_orders SET status = 'รอตรวจสอบการชำระเงิน' WHERE id = ? AND status = 'ชำระเงินแล้ว'");
             $stmt_order->bind_param("s", $orderId);
             $stmt_order->execute();
 

@@ -33,6 +33,7 @@ include '_head.php';
                             <thead>
                                 <tr>
                                     <th>ID</th>
+                                    <th>รูปภาพ</th>
                                     <th>ชื่อสินค้า</th>
                                     <th>หมวดหมู่</th>
                                     <th>ราคา</th>
@@ -88,6 +89,14 @@ include '_head.php';
                             <label for="description">รายละเอียดสินค้า</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
+                        <div class="form-group">
+                            <label for="material">วัสดุ</label>
+                            <input type="text" class="form-control" id="material" name="material">
+                        </div>
+                        <div class="form-group">
+                            <label for="discount_amount">ส่วนลด (สำหรับคอมโบ)</label>
+                            <input type="number" class="form-control" id="discount_amount" name="discount_amount" step="0.01" value="0.00">
+                        </div>
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="stock">สต็อก</label>
@@ -103,11 +112,18 @@ include '_head.php';
                         </div>
                          <div class="form-group">
                             <label for="sizes">ไซส์ (JSON)</label>
-                            <input type="text" class="form-control" id="sizes" name="sizes" placeholder='["S", "M", "L"]'>
+                            <input type="text" class="form-control" id="sizes" name="sizes" placeholder='S, M, L'>
                         </div>
                         <div class="form-group">
                             <label for="colors">สี (JSON)</label>
-                            <input type="text" class="form-control" id="colors" name="colors" placeholder='["แดง", "น้ำเงิน"]'>
+                            <input type="text" class="form-control" id="colors" name="colors" placeholder='แดง, น้ำเงิน'>
+                        </div>
+                        <div class="form-group">
+                            <label for="productImage">รูปภาพสินค้า</label>
+                            <input type="file" class="form-control-file" id="productImage" name="productImage" accept="image/*">
+                            <div id="currentProductImage" class="mt-2">
+                                <!-- Current image will be displayed here -->
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>

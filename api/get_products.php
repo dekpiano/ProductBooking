@@ -26,8 +26,8 @@ try {
     $products = [];
     while ($row = $result->fetch_assoc()) {
         // Decode JSON fields for sizes and colors
-        $row['sizes'] = json_decode($row['sizes']);
-        $row['colors'] = json_decode($row['colors']);
+        // $row['sizes'] = json_decode($row['sizes']); // No longer JSON
+        // $row['colors'] = json_decode($row['colors']); // No longer JSON
         $products[] = $row;
     }
 

@@ -15,7 +15,7 @@ try {
     if (isset($_GET['id'])) {
         // Fetch single product
         $productId = $_GET['id'];
-        $stmt = $conn->prepare("SELECT id, name, category, price, stock, is_active, description, material, sizes, colors, discount_amount FROM tb_products WHERE id = ?");
+        $stmt = $conn->prepare("SELECT id, name, category, price, stock, is_active, description, material, image_url, sizes, colors, discount_amount FROM tb_products WHERE id = ?");
         $stmt->bind_param("i", $productId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -28,7 +28,7 @@ try {
         $stmt->close();
     } else {
         // Fetch all products
-        $stmt = $conn->prepare("SELECT id, name, category, price, stock, is_active, description, material, sizes, colors, discount_amount FROM tb_products ORDER BY id DESC");
+        $stmt = $conn->prepare("SELECT id, name, category, price, stock, is_active, description, material, image_url, sizes, colors, discount_amount FROM tb_products ORDER BY id DESC");
         $stmt->execute();
         $result = $stmt->get_result();
 
