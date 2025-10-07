@@ -285,14 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
                             }, "className": "px-6 py-4 whitespace-nowrap text-sm text-gray-500" }
                         ],
                         "order": [[ 6, "desc" ]], // Order by created_at descending
-                        "searching": true, // We have custom search input
+                        "paging": true,
+                        "searching": false, // We have custom search input
+                        "info": true,
                         "language": {
                             "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Thai.json"
                         },
-                        "destroy": true, // Allow re-initialization if needed, though we'll manage it
-                        "rowCallback": function(row, data, index) {
-                            // No custom background color for rows
-                        }
+                        "destroy": true // Allow re-initialization if needed, though we'll manage it
                     });
                 } else {
                     // Update existing DataTables instance
