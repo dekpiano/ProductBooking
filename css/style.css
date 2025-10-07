@@ -106,3 +106,7 @@ button[type="submit"]:hover {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     z-index: 10; /* Ensure it appears above other elements */
 }
+
+#ordersTable tbody tr {
+    background-color: white !important;
+}

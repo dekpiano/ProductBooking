@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show loading indicator
         if (ordersDataTable) {
             ordersDataTable.clear().draw(); // Clear existing data
-            ordersDataTable.processing(true); // Show processing indicator
+
         } else {
             ordersTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
         }
@@ -265,11 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     ordersDataTable = $('#ordersTable').DataTable({
                         "data": data.orders,
                         "columns": [
-                            { "data": "id", "className": "font-mono text-sm text-purple-700 break-all" },
-                            { "data": null, "render": function(data, type, row) { return row.first_name + ' ' + row.last_name; } },
-                            { "data": "phone" },
-                            { "data": "items_summary", "className": "text-sm text-gray-600 whitespace-normal" },
-                            { "data": "final_amount", "render": function(data, type, row) { return '฿' + parseFloat(data).toLocaleString(); }, "className": "font-semibold" },
+                            { "data": "id", "className": "px-6 py-4 whitespace-nowrap font-mono text-sm text-purple-700 break-all" },
+                            { "data": null, "render": function(data, type, row) { return row.first_name + ' ' + row.last_name; }, "className": "px-6 py-4 whitespace-nowrap text-sm text-gray-800" },
+                            { "data": "phone", "className": "px-6 py-4 whitespace-nowrap text-sm text-gray-800" },
+                            { "data": "items_summary", "className": "px-6 py-4 whitespace-normal text-sm text-gray-600" },
+                            { "data": "final_amount", "render": function(data, type, row) { return '฿' + parseFloat(data).toLocaleString(); }, "className": "px-6 py-4 whitespace-nowrap font-semibold text-sm text-gray-800" },
                             { "data": "status", "render": function(data, type, row) {
                                 let statusClass = '';
                                 switch(data) {
@@ -279,19 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
                                     default: statusClass = 'bg-gray-100 text-gray-800';
                                 }
                                 return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${data}</span>`;
-                            }},
+                            }, "className": "px-6 py-4 whitespace-nowrap text-sm text-gray-800" },
                             { "data": "created_at", "render": function(data, type, row) {
                                 return new Date(data).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
-                            }, "className": "text-sm text-gray-500" }
+                            }, "className": "px-6 py-4 whitespace-nowrap text-sm text-gray-500" }
                         ],
                         "order": [[ 6, "desc" ]], // Order by created_at descending
-                        "paging": true,
-                        "searching": false, // We have custom search input
-                        "info": true,
+                        "searching": true, // We have custom search input
                         "language": {
                             "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Thai.json"
                         },
-                        "destroy": true // Allow re-initialization if needed, though we'll manage it
+                        "destroy": true, // Allow re-initialization if needed, though we'll manage it
+                        "rowCallback": function(row, data, index) {
+                            // No custom background color for rows
+                        }
                     });
                 } else {
                     // Update existing DataTables instance
@@ -325,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
         } finally {
             if (ordersDataTable) {
-                ordersDataTable.processing(false); // Hide processing indicator
+    
             }
         }
     };
