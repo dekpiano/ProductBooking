@@ -94,6 +94,9 @@ button[type="submit"]:hover {
 }
 
 .product-thumbnail {
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
     transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     cursor: pointer;
 }

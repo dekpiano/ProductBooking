@@ -97,8 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-gray-600 text-sm mt-2">${bracelet.description}</p>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center"><span class="text-gray-600">วัสดุ:</span> <span class="font-semibold">${bracelet.material}</span></div>
-                        <div class="flex justify-between items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold">${bracelet.sizes}</span></div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${bracelet.sizes}</span></div>
                     </div>
                     <div class="border-t pt-3 mt-3">
                         <div class="flex justify-between items-center">
@@ -121,8 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-gray-600 text-sm mt-2">${shirt.description}</p>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center"><span class="text-gray-600">วัสดุ:</span> <span class="font-semibold">${shirt.material}</span></div>
-                        <div class="flex justify-between items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold">${shirt.sizes}</span></div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${shirt.sizes}</span></div>
                     </div>
                     <div class="border-t pt-3 mt-3">
                         <div class="flex justify-between items-center">
@@ -265,10 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                         return `
                             <tr class="hover:bg-gray-50">
-                                <td class="border-b border-gray-200 px-4 py-3 font-mono text-sm text-purple-700">${order.id}</td>
+                                <td class="border-b border-gray-200 px-4 py-3 font-mono text-sm text-purple-700 break-all">${order.id}</td>
                                 <td class="border-b border-gray-200 px-4 py-3">${order.first_name} ${order.last_name}</td>
                                 <td class="border-b border-gray-200 px-4 py-3">${order.phone}</td>
-                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-600">${order.items_summary || 'N/A'}</td>
+                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-600 whitespace-normal">${order.items_summary || 'N/A'}</td>
                                 <td class="border-b border-gray-200 px-4 py-3 font-semibold">฿${parseFloat(order.final_amount).toLocaleString()}</td>
                                 <td class="border-b border-gray-200 px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${order.status}</span></td>
                                 <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-500">${createdDate}</td>
@@ -745,6 +743,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if(braceletCheckbox) braceletCheckbox.addEventListener('change', handleProductSelection);
         if(shirtCheckbox) shirtCheckbox.addEventListener('change', handleProductSelection);
+
+        const showSizeChartLink = document.getElementById('show-size-chart');
+        if (showSizeChartLink) {
+            showSizeChartLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                Swal.fire({
+                    imageUrl: 'uploads/728125.jpg', // Placeholder, replace with your actual image URL
+                    imageAlt: 'ตารางขนาดเสื้อ',
+                    imageWidth: 400,
+                    width: '50%'
+                });
+            });
+        }
+
         switchToProductsView();
         loadProductsAndRender();
     };
