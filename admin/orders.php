@@ -16,6 +16,9 @@ include '_head.php';
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
+            <script>
+                const currentAdminId = <?php echo json_encode($_SESSION['admin_id']); ?>;
+            </script>
 
             <!-- Page Heading -->
             <h1 class="h3 mb-2 text-gray-800">จัดการคำสั่งซื้อ</h1>
@@ -37,6 +40,7 @@ include '_head.php';
                                     <th>สถานะ</th>
                                     <th>วิธีชำระเงิน</th>
                                     <th>วันที่สั่งซื้อ</th>
+                                    <th>ผู้อนุมัติ</th>
                                     <th>การดำเนินการ</th>
                                 </tr>
                             </thead>
@@ -78,5 +82,5 @@ include '_head.php';
             </div>
         </div>
     </div>
-    <script src="js/orders.js"></script> <!-- New JS for orders management -->
+
 <?php include '_footer.php'; ?>
