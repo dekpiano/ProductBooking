@@ -32,6 +32,11 @@
             <i class="fas fa-fw fa-clipboard-list"></i>
             <span>คำสั่งซื้อ</span></a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="fulfillment.php">
+            <i class="fas fa-fw fa-boxes"></i>
+            <span>จัดการการจัดเตรียมสินค้า</span></a>
+    </li>
    
 <!-- Heading -->
     <div class="sidebar-heading">

@@ -238,10 +238,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    let ordersDataTable = null; // Declare outside the function
+
     const loadAndRenderOrders = async () => {
         const query = searchOrderInput.value;
         const status = statusFilterSelect.value;
-        ordersTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
+
+        // Show loading indicator
+        if (ordersDataTable) {
+            ordersDataTable.clear().draw(); // Clear existing data
+            ordersDataTable.processing(true); // Show processing indicator
+        } else {
+            ordersTableBody.innerHTML = '<tr><td colspan="7" class="text-center p-8 text-gray-500">กำลังโหลดข้อมูล...</td></tr>';
+        }
+
 
         try {
             const response = await fetch(`api/public/get_orders.php?q=${encodeURIComponent(query)}&status=${encodeURIComponent(status)}`);
@@ -249,41 +259,74 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (data.success) {
                 lastUpdateSpan.textContent = new Date().toLocaleTimeString();
+
+                if (!ordersDataTable) {
+                    // Initialize DataTables if not already initialized
+                    ordersDataTable = $('#ordersTable').DataTable({
+                        "data": data.orders,
+                        "columns": [
+                            { "data": "id", "className": "font-mono text-sm text-purple-700 break-all" },
+                            { "data": null, "render": function(data, type, row) { return row.first_name + ' ' + row.last_name; } },
+                            { "data": "phone" },
+                            { "data": "items_summary", "className": "text-sm text-gray-600 whitespace-normal" },
+                            { "data": "final_amount", "render": function(data, type, row) { return '฿' + parseFloat(data).toLocaleString(); }, "className": "font-semibold" },
+                            { "data": "status", "render": function(data, type, row) {
+                                let statusClass = '';
+                                switch(data) {
+                                    case 'รอชำระเงิน': statusClass = 'bg-yellow-100 text-yellow-800'; break;
+                                    case 'รอตรวจสอบการชำระเงิน': statusClass = 'bg-blue-100 text-blue-800'; break;
+                                    case 'ชำระเงินแล้ว': statusClass = 'bg-green-100 text-green-800'; break;
+                                    default: statusClass = 'bg-gray-100 text-gray-800';
+                                }
+                                return `<span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${data}</span>`;
+                            }},
+                            { "data": "created_at", "render": function(data, type, row) {
+                                return new Date(data).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+                            }, "className": "text-sm text-gray-500" }
+                        ],
+                        "order": [[ 6, "desc" ]], // Order by created_at descending
+                        "paging": true,
+                        "searching": false, // We have custom search input
+                        "info": true,
+                        "language": {
+                            "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Thai.json"
+                        },
+                        "destroy": true // Allow re-initialization if needed, though we'll manage it
+                    });
+                } else {
+                    // Update existing DataTables instance
+                    ordersDataTable.clear().rows.add(data.orders).draw();
+                }
+
+                // Show/hide empty state
                 if (data.orders.length > 0) {
                     ordersTableBody.parentElement.classList.remove('hidden');
                     emptyStateDiv.classList.add('hidden');
-                    let rowsHtml = data.orders.map(order => {
-                        const createdDate = new Date(order.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
-                        let statusClass = '';
-                        switch(order.status) {
-                            case 'รอชำระเงิน': statusClass = 'bg-yellow-100 text-yellow-800'; break;
-                            case 'รอตรวจสอบการชำระเงิน': statusClass = 'bg-blue-100 text-blue-800'; break;
-                            case 'ชำระเงินแล้ว': statusClass = 'bg-green-100 text-green-800'; break;
-                            default: statusClass = 'bg-gray-100 text-gray-800';
-                        }
-                        return `
-                            <tr class="hover:bg-gray-50">
-                                <td class="border-b border-gray-200 px-4 py-3 font-mono text-sm text-purple-700 break-all">${order.id}</td>
-                                <td class="border-b border-gray-200 px-4 py-3">${order.first_name} ${order.last_name}</td>
-                                <td class="border-b border-gray-200 px-4 py-3">${order.phone}</td>
-                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-600 whitespace-normal">${order.items_summary || 'N/A'}</td>
-                                <td class="border-b border-gray-200 px-4 py-3 font-semibold">฿${parseFloat(order.final_amount).toLocaleString()}</td>
-                                <td class="border-b border-gray-200 px-4 py-3"><span class="px-2 py-1 text-xs font-semibold rounded-full ${statusClass}">${order.status}</span></td>
-                                <td class="border-b border-gray-200 px-4 py-3 text-sm text-gray-500">${createdDate}</td>
-                            </tr>
-                        `;
-                    }).join('');
-                    ordersTableBody.innerHTML = rowsHtml;
                 } else {
                     ordersTableBody.parentElement.classList.add('hidden');
                     emptyStateDiv.classList.remove('hidden');
                 }
+
             } else {
-                ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">เกิดข้อผิดพลาด: ${data.message}</td></tr>`;
+                if (ordersDataTable) {
+                    ordersDataTable.clear().draw();
+                }
+                ordersTableBody.parentElement.classList.add('hidden');
+                emptyStateDiv.classList.remove('hidden'); // Show empty state on error or no data
+                // ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">เกิดข้อผิดพลาด: ${data.message}</td></tr>`;
             }
         } catch (error) {
             console.error('Failed to load orders:', error);
-            ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
+            if (ordersDataTable) {
+                ordersDataTable.clear().draw();
+            }
+            ordersTableBody.parentElement.classList.add('hidden');
+            emptyStateDiv.classList.remove('hidden'); // Show empty state on error
+            // ordersTableBody.innerHTML = `<tr><td colspan="7" class="text-center p-8 text-red-500">ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้</td></tr>`;
+        } finally {
+            if (ordersDataTable) {
+                ordersDataTable.processing(false); // Hide processing indicator
+            }
         }
     };
 

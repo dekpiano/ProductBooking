@@ -37,7 +37,7 @@ include '_head.php';
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
                                         สินค้าทั้งหมด</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalProductsCount">0</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-box fa-2x text-gray-300"></i>
@@ -47,65 +47,69 @@ include '_head.php';
                     </div>
                 </div>
 
-                <!-- Earnings (Monthly) Card Example -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-success shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        คำสั่งซื้อที่รออนุมัติ</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                        คำสั่งซื้อรอชำระเงิน</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingPaymentOrdersCount">0</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                    <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Earnings (Monthly) Card Example -->
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-info shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">งานที่ต้องทำ
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">คำสั่งซื้อรอตรวจสอบ
                                     </div>
-                                    <div class="row no-gutters align-items-center">
-                                        <div class="col-auto">
-                                            <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                                        </div>
-                                        <div class="col">
-                                            <div class="progress progress-sm mr-2">
-                                                <div class="progress-bar bg-info" role="progressbar"
-                                                    style="width: 50%" aria-valuenow="50" aria-valuemin="0"
-                                                    aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="pendingVerificationOrdersCount">0</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                    <i class="fas fa-search-dollar fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pending Requests Card Example -->
+                <!-- Paid Orders Card Example -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        คำสั่งซื้อที่ชำระเงินแล้ว</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="paidOrdersCount">0</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="col-xl-3 col-md-6 mb-4">
                     <div class="card border-left-warning shadow h-100 py-2">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        คำขอที่รอดำเนินการ</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                        รายได้รวม</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalRevenueAmount">฿0.00</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                    <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
                                 </div>
                             </div>
                         </div>
@@ -135,3 +139,4 @@ include '_head.php';
     </div>
     <!-- End of Main Content -->
 <?php include '_footer.php'; ?>
+<script src="js/dashboard.js"></script>
