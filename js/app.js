@@ -708,25 +708,49 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        state.order.payment_confirmation = { transfer_amount: transferAmount, transfer_date: transferDate, transfer_time: transferTime, from_bank: document.getElementById('fromBank').value, from_account_name: document.getElementById('fromAccountName').value, slip_file: slipFile };
-        const finalFormData = new FormData();
-        finalFormData.append('order_data', JSON.stringify({ items: state.order.items, customer: state.order.customer, payment_method_id: state.order.payment_method_id, total_amount: state.order.total_amount, discount_amount: state.order.discount_amount, final_amount: state.order.final_amount }));
-        finalFormData.append('payment_confirmation_data', JSON.stringify({ transfer_amount: state.order.payment_confirmation.transfer_amount, transfer_date: state.order.payment_confirmation.transfer_date, transfer_time: state.order.payment_confirmation.transfer_time, from_bank: state.order.payment_confirmation.from_bank, from_account_name: state.order.payment_confirmation.from_account_name }));
-        if (state.order.payment_confirmation.slip_file) { finalFormData.append('slip_file', state.order.payment_confirmation.slip_file); }
-        
-        fetch('api/public/create_order.php', { method: 'POST', body: finalFormData })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                finalOrderNumberSpan.textContent = data.order_id;
-                showStep(5);
-            } else {
-                Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: data.message });
+        Swal.fire({
+            title: 'ยืนยันการส่งข้อมูล',
+            text: "คุณตรวจสอบข้อมูลการชำระเงินเรียบร้อยแล้วใช่หรือไม่?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#dc3545',
+            confirmButtonText: 'ใช่, ยืนยัน',
+            cancelButtonText: 'ยกเลิก'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const loadingSwal = Swal.fire({
+                    title: 'กำลังบันทึกข้อมูล...',
+                    text: 'กรุณารอสักครู่',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                state.order.payment_confirmation = { transfer_amount: transferAmount, transfer_date: transferDate, transfer_time: transferTime, from_bank: document.getElementById('fromBank').value, from_account_name: document.getElementById('fromAccountName').value, slip_file: slipFile };
+                const finalFormData = new FormData();
+                finalFormData.append('order_data', JSON.stringify({ items: state.order.items, customer: state.order.customer, payment_method_id: state.order.payment_method_id, total_amount: state.order.total_amount, discount_amount: state.order.discount_amount, final_amount: state.order.final_amount }));
+                finalFormData.append('payment_confirmation_data', JSON.stringify({ transfer_amount: state.order.payment_confirmation.transfer_amount, transfer_date: state.order.payment_confirmation.transfer_date, transfer_time: state.order.payment_confirmation.transfer_time, from_bank: state.order.payment_confirmation.from_bank, from_account_name: state.order.payment_confirmation.from_account_name }));
+                if (state.order.payment_confirmation.slip_file) { finalFormData.append('slip_file', state.order.payment_confirmation.slip_file); }
+                
+                fetch('api/public/create_order.php', { method: 'POST', body: finalFormData })
+                .then(response => response.json())
+                .then(data => {
+                    loadingSwal.close();
+                    if (data.success) {
+                        finalOrderNumberSpan.textContent = data.order_id;
+                        showStep(5);
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: data.message });
+                    }
+                })
+                .catch(error => {
+                    loadingSwal.close();
+                    console.error('Error submitting order:', error);
+                    Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้' });
+                });
             }
-        })
-        .catch(error => {
-            console.error('Error submitting order:', error);
-            Swal.fire({ icon: 'error', title: 'การเชื่อมต่อล้มเหลว', text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้' });
         });
     });
 

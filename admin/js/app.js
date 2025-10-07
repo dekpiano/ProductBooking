@@ -305,27 +305,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const response = await fetch(`../api/admin/admin_get_order_details.php?order_id=${orderId}`);
                 const data = await response.json();
 
-                if (data.success && data.orders.length > 0) {
-                    const order = data.orders[0];
-                    if (order.slip_filename) {
-                        slipImage.src = `../uploads/slips/${order.slip_filename}`; // Adjust path as needed
-                        transferAmount.textContent = parseFloat(order.transfer_amount).toFixed(2);
-                        transferDate.textContent = order.transfer_date;
-                        transferTime.textContent = order.transfer_time;
-                        fromBank.textContent = order.from_bank || '-';
-                        fromAccountName.textContent = order.from_account_name || '-';
-                        paymentSlipModalElement.modal('show'); // Show Bootstrap 4 modal
+                if (data.success && data.order && data.payment_confirmation) {
+                    const paymentConfirmation = data.payment_confirmation;
+                    if (paymentConfirmation.slip_filename) {
+                        slipImage.src = `../uploads/slips/${paymentConfirmation.slip_filename}`;
+                        transferAmount.textContent = parseFloat(paymentConfirmation.transfer_amount).toFixed(2);
+                        transferDate.textContent = paymentConfirmation.transfer_date;
+                        transferTime.textContent = paymentConfirmation.transfer_time;
+                        fromBank.textContent = paymentConfirmation.from_bank || '-';
+                        fromAccountName.textContent = paymentConfirmation.from_account_name || '-';
+                        paymentSlipModalElement.modal('show');
                     } else {
                         Swal.fire('ไม่พบสลิป', 'ไม่พบสลิปการชำระเงินสำหรับคำสั่งซื้อนี้', 'info');
                     }
                 } else {
-                    Swal.fire('ข้อผิดพลาด', 'ไม่พบรายละเอียดคำสั่งซื้อ: ' + data.message, 'error');
+                    Swal.fire('ข้อผิดพลาด', 'ไม่พบรายละเอียดคำสั่งซื้อ: ' + (data.message || 'No details found'), 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
                 Swal.fire('ข้อผิดพลาด', 'เกิดข้อผิดพลาดในการเชื่อมต่อขณะดึงรายละเอียดคำสั่งซื้อ', 'error');
             }
-            
         });
 
         $(ordersTableBody).on('click', '.approve-payment-btn', async function() {
