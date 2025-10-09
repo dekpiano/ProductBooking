@@ -82,100 +82,71 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Dynamic Rendering ---
     const renderProducts = (products) => {
         const container = document.getElementById('product-list-container');
-        let html = '<div class="grid md:grid-cols-3 gap-8 mb-8">'; // Main grid container
-
-        // Separate out bracelet, shirt, and combo for special handling
-        const braceletProduct = products.find(p => p.category === 'bracelet');
-        const shirtProduct = products.find(p => p.category === 'shirt');
-        const comboProduct = products.find(p => p.category === 'combo');
-
-        // Render other products first, or all products generically
-        products.forEach(product => {
-            if (product.category !== 'bracelet' && product.category !== 'shirt' && product.category !== 'combo') {
-                // Generic product card rendering
-                html += `
-                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 flex flex-col">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-6 text-center">✨ ${product.name}</h3>
-                    <div class="bg-white rounded-lg p-6 shadow-md flex-grow flex flex-col">
-                        <div class="text-center mb-4 flex-grow">
-                            ${product.image_url ? `<img src="${product.image_url}" alt="${product.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📦</span></div>`}
-                            <h4 class="text-xl font-semibold text-gray-800 mt-4">${product.name}</h4>
-                            <p class="text-gray-600 text-sm mt-2">${product.description}</p>
-                        </div>
-                        <div class="border-t pt-3 mt-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-lg font-semibold text-gray-800">ราคา:</span>
-                                <span class="text-2xl font-bold text-purple-600">฿${parseFloat(product.price).toLocaleString()}</span>
-                            </div>
-                        </div>
-                        <button onclick="switchToNewOrder()" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">สั่งจอง</button>
-                    </div>
-                </div>`;
-            }
-        });
-
-        // Render bracelet and shirt specifically if they exist
-        if (braceletProduct) {
+        const bracelet = products.find(p => p.category === 'bracelet');
+        const shirt = products.find(p => p.category === 'shirt');
+        const combo = products.find(p => p.category === 'combo');
+        let html = '';
+        html += '<div class="grid md:grid-cols-3 gap-8 mb-8">';
+        if (bracelet) {
             html += `
             <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 flex flex-col">
-                <h3 class="text-2xl font-bold text-purple-800 mb-6 text-center">📿 ${braceletProduct.name}</h3>
+                <h3 class="text-2xl font-bold text-purple-800 mb-6 text-center">📿 ${bracelet.name}</h3>
                 <div class="bg-white rounded-lg p-6 shadow-md flex-grow flex flex-col">
                     <div class="text-center mb-4 flex-grow">
-                        ${braceletProduct.image_url ? `<img src="${braceletProduct.image_url}" alt="${braceletProduct.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿</span></div>`}
-                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${braceletProduct.name}</h4>
-                        <p class="text-gray-600 text-sm mt-2">${braceletProduct.description}</p>
+                        ${bracelet.image_url ? `<img src="${bracelet.image_url}" alt="${bracelet.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿</span></div>`}
+                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${bracelet.name}</h4>
+                        <p class="text-gray-600 text-sm mt-2">${bracelet.description}</p>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${braceletProduct.sizes || '-'}</span></div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${bracelet.sizes}</span></div>
                     </div>
                     <div class="border-t pt-3 mt-3">
                         <div class="flex justify-between items-center">
                             <span class="text-lg font-semibold text-gray-800">ราคา:</span>
-                            <span class="text-2xl font-bold text-purple-600">฿${parseFloat(braceletProduct.price).toLocaleString()}</span>
+                            <span class="text-2xl font-bold text-purple-600">฿${parseFloat(bracelet.price).toLocaleString()}</span>
                         </div>
                     </div>
                     <button onclick="switchToNewOrder()" class="w-full mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">สั่งจอง</button>
                 </div>
             </div>`;
         }
-        if (shirtProduct) {
+        if (shirt) {
              html += `
              <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 flex flex-col">
-                <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">👕 ${shirtProduct.name}</h3>
+                <h3 class="text-2xl font-bold text-blue-800 mb-6 text-center">👕 ${shirt.name}</h3>
                 <div class="bg-white rounded-lg p-6 shadow-md flex-grow flex flex-col">
                     <div class="text-center mb-4 flex-grow">
-                        ${shirtProduct.image_url ? `<img src="${shirtProduct.image_url}" alt="${shirtProduct.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">👕</span></div>`}
-                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${shirtProduct.name}</h4>
-                        <p class="text-gray-600 text-sm mt-2">${shirtProduct.description}</p>
+                        ${shirt.image_url ? `<img src="${shirt.image_url}" alt="${shirt.name}" class="w-64 h-64 object-cover rounded-lg mx-auto mb-4 product-thumbnail">` : `<div class="w-64 h-64 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">👕</span></div>`}
+                        <h4 class="text-xl font-semibold text-gray-800 mt-4">${shirt.name}</h4>
+                        <p class="text-gray-600 text-sm mt-2">${shirt.description}</p>
                     </div>
                     <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${shirtProduct.sizes || '-'}</span></div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center"><span class="text-gray-600">ขนาด:</span> <span class="font-semibold sm:text-right break-all">${shirt.sizes}</span></div>
                     </div>
                     <div class="border-t pt-3 mt-3">
                         <div class="flex justify-between items-center">
                             <span class="text-lg font-semibold text-gray-800">ราคา:</span>
-                            <span class="text-2xl font-bold text-blue-600">฿${parseFloat(shirtProduct.price).toLocaleString()}</span>
+                            <span class="text-2xl font-bold text-blue-600">฿${parseFloat(shirt.price).toLocaleString()}</span>
                         </div>
                     </div>
                     <button onclick="switchToNewOrder()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors">สั่งจอง</button>
                 </div>
             </div>`;
-        }
-        if (comboProduct && braceletProduct && shirtProduct) {
-            const originalPrice = parseFloat(braceletProduct.price) + parseFloat(shirtProduct.price);
-            const discount = comboProduct.discount_amount ? parseFloat(comboProduct.discount_amount) : originalPrice - parseFloat(comboProduct.price);
+            if (combo && bracelet && shirt) {
+            const originalPrice = parseFloat(bracelet.price) + parseFloat(shirt.price);
+            const discount = combo.discount_amount ? parseFloat(combo.discount_amount) : originalPrice - parseFloat(combo.price);
             html += `
             <div class="bg-gradient-to-r from-purple-100 via-pink-100 to-purple-100 rounded-xl p-8 border-2 border-purple-200 mb-8">
                 <div class="text-center">
-                    <h3 class="text-2xl font-bold text-purple-800 mb-4">🎁 ${comboProduct.name}</h3>
+                    <h3 class="text-2xl font-bold text-purple-800 mb-4">🎁 ${combo.name}</h3>
                     <div class="bg-white rounded-lg p-6 shadow-lg inline-block">
-                        ${comboProduct.image_url ? `<img src="${comboProduct.image_url}" alt="${comboProduct.name}" class="w-64 h-64 object-contain mx-auto mb-4">` : `<div class="w-64 h-64 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿+👕</span></div>`}
+                        ${combo.image_url ? `<img src="${combo.image_url}" alt="${combo.name}" class="w-64 h-64 object-contain mx-auto mb-4">` : `<div class="w-64 h-64 bg-gray-200 rounded-lg mx-auto mb-4 flex items-center justify-center"><span class="text-5xl">📿+👕</span></div>`}
 
                         <h4 class="text-xl font-semibold text-gray-800 mb-2 mt-4">คอมโบพิเศษ</h4>
-                        <p class="text-gray-600 mb-4">${comboProduct.description}</p>
+                        <p class="text-gray-600 mb-4">${combo.description}</p>
                         <div class="flex items-center justify-center space-x-4 mb-4">
                             <span class="text-lg text-gray-500 line-through">฿${originalPrice.toLocaleString()}</span>
-                            <span class="text-3xl font-bold text-purple-600">฿${parseFloat(comboProduct.price).toLocaleString()}</span>
+                            <span class="text-3xl font-bold text-purple-600">฿${parseFloat(combo.price).toLocaleString()}</span>
                         </div>
                         <div class="bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-semibold">ประหยัด ฿${discount.toLocaleString()}!</div>
                     </div>
@@ -184,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>`;
+        }
         }
         html += '</div>';
        
