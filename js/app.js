@@ -37,12 +37,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('step5'),
     ];
 
+    const step1RelatedElements = [
+        document.getElementById('cartContainer'),
+        document.getElementById('comboOptionContainer'),
+        document.getElementById('summaryPriceContainer'),
+        document.getElementById('navigationButtonsContainer'),
+    ];
+
     // Step 1 Elements (New)
 
     
-    const shirtQtyInput = document.getElementById('shirtQty');
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const braceletQtyInput = document.getElementById('braceletQty');
+
     const cartItemsContainer = document.getElementById('cartItems');
 
     const genderSelectionDiv = document.getElementById('genderSelection');
@@ -191,88 +196,199 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     };
 
-    const updateNewOrderView = (products) => {
-        const bracelet = products.find(p => p.category === 'bracelet');
-        const shirt = products.find(p => p.category === 'shirt');
-        const combo = products.find(p => p.category === 'combo');
+    const renderNewOrderProducts = (products) => {
+        const container = document.getElementById('newOrderProductListContainer');
+        if (!container) return;
 
-        // Update Bracelet Info
-        if(bracelet) {
-            const braceletContainer = document.querySelector('.flex.items-center.p-3.border.border-gray-200.rounded-lg'); // Target the main container
-            if (braceletContainer) {
-                braceletContainer.querySelector('.font-medium.text-base').textContent = bracelet.name;
-                braceletContainer.querySelector('.text-xs.text-gray-500').textContent = bracelet.description;
-                const braceletPriceElement = braceletContainer.querySelector('#braceletPrice'); // Get from container
-                if (braceletPriceElement) { // Check if it exists
-                    braceletPriceElement.textContent = `฿${parseFloat(bracelet.price)} / ชิ้น`;
-                }
-                const braceletImage = document.getElementById('braceletImage');
-                if (braceletImage) {
-                    if (bracelet.image_url) {
-                        braceletImage.src = bracelet.image_url;
-                        braceletImage.classList.remove('hidden');
-                    } else {
-                        braceletImage.src = ''; // Clear src if no image_url
-                        braceletImage.classList.add('hidden'); // Hide image
-                    }
-                }
-            }
+        let html = '';
+        const braceletProduct = products.find(p => p.category === 'bracelet');
+        const shirtProduct = products.find(p => p.category === 'shirt');
+        const comboProduct = products.find(p => p.category === 'combo');
+
+        // Render Bracelet Product
+        if (braceletProduct) {
+            html += `
+            <div>
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">📿 ${braceletProduct.name}</h3>
+                <div class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 transition-colors">
+                    <div id="braceletImageContainer" class="w-24 h-24 rounded-lg mr-4 flex items-center justify-center bg-gray-100">
+                        ${braceletProduct.image_url ? `<img id="braceletImage" src="${braceletProduct.image_url}" alt="${braceletProduct.name}" class="w-full h-full object-cover rounded-lg">` : `<img id="braceletImage" src="" alt="${braceletProduct.name}" class="w-full h-full object-cover rounded-lg hidden"><span id="braceletImagePlaceholder" class="text-3xl text-gray-400">📿</span>`}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium text-lg">${braceletProduct.name}</div>
+                        <div class="text-sm text-gray-500">${braceletProduct.description}</div>
+                        <div id="braceletPrice" class="text-purple-600 font-semibold text-xl">฿${parseFloat(braceletProduct.price).toLocaleString()} / ชิ้น</div>
+                    </div>
+                    <div class="flex flex-col items-end space-y-2">
+                        <div class="flex items-center space-x-3">
+                            <button type="button" onclick="updateBraceletQuantity(-1)" id="bracelet-qty-minus" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
+                            <input type="number" id="braceletQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold">
+                            <button type="button" onclick="updateBraceletQuantity(1)" id="bracelet-qty-plus" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
+                        </div>
+                        <button id="addBraceletToCartBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-base">
+                            <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                        </button>
+                    </div>
+                </div>
+            </div>`;
         }
 
-        // Update Shirt Info
-        if(shirt) {
-            const shirtInfoDiv = document.getElementById('shirtInfo');
-            if (shirtInfoDiv) {
-                const shirtNameElement = shirtInfoDiv.querySelector('.font-medium.text-base');
-                if (shirtNameElement) {
-                    shirtNameElement.textContent = shirt.name;
-                }
-                const shirtDescriptionElement = shirtInfoDiv.querySelector('.text-xs.text-gray-500');
-                if (shirtDescriptionElement) {
-                    shirtDescriptionElement.textContent = shirt.description;
-                }
-                const shirtPriceElement = shirtInfoDiv.querySelector('#shirtPrice'); // Get from container
-                if (shirtPriceElement) {
-                    shirtPriceElement.textContent = `฿${parseFloat(shirt.price)} / ตัว`;
-                }
-                const shirtImage = document.getElementById('shirtImage');
-                const shirtImagePlaceholder = document.getElementById('shirtImagePlaceholder');
-                if (shirtImage && shirtImagePlaceholder) {
-                    if (shirt.image_url) {
-                        shirtImage.src = shirt.image_url;
-                        shirtImage.classList.remove('hidden');
-                        shirtImagePlaceholder.classList.add('hidden'); // Hide placeholder
-                    } else {
-                        shirtImage.src = ''; // Clear src if no image_url
-                        shirtImage.classList.add('hidden'); // Hide image
-                        shirtImagePlaceholder.classList.remove('hidden'); // Show placeholder
-                    }
-                }
-            }
-            const sizeContainer = document.querySelector('#sizeSelection .flex');
-            if(sizeContainer) {
-                const sizesArray = shirt.sizes ? shirt.sizes.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
-                sizeContainer.innerHTML = sizesArray.map(size => `
-                        <label class="flex items-center justify-center w-16 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                            <input type="radio" name="size" value="${size}" class="sr-only">
-                            <span class="font-semibold">${size}</span>
-                        </label>`).join('');
-            }
+        // Render Shirt Product
+        if (shirtProduct) {
+            html += `
+            <div class="p-4 border-2 border-gray-200 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-700 mb-4">👕 ${shirtProduct.name}</h3>
+                <div class="flex items-start">
+                    <div id="shirtImageContainer" class="w-32 h-32 rounded-lg mr-4 flex items-center justify-center bg-gray-100">
+                        ${shirtProduct.image_url ? `<img id="shirtImage" src="${shirtProduct.image_url}" alt="${shirtProduct.name}" class="w-full h-full object-cover rounded-lg">` : `<img id="shirtImage" src="" alt="${shirtProduct.name}" class="w-full h-full object-cover rounded-lg hidden"><span id="shirtImagePlaceholder" class="text-4xl text-gray-400">👕</span>`}
+                    </div>
+                    <div class="flex-1">
+                        <div id="shirtInfo">
+                            <div class="font-medium text-lg">${shirtProduct.name}</div>
+                            <div class="text-sm text-gray-500">${shirtProduct.description}</div>
+                            <div id="shirtPrice" class="text-purple-600 font-semibold text-xl">฿${parseFloat(shirtProduct.price).toLocaleString()} / ตัว</div>
+                        </div>
+                        
+                        <div id="genderSelection" class="mt-4">
+                            <h4 class="text-md font-semibold text-gray-700 mb-2">🚻 เลือกเพศ</h4>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="flex items-center justify-center w-24 h-12 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors text-base">
+                                    <input type="radio" name="gender" value="male" class="sr-only">
+                                    <span class="font-semibold">ชาย</span>
+                                </label>
+                                <label class="flex items-center justify-center w-24 h-12 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors text-base">
+                                    <input type="radio" name="gender" value="female" class="sr-only">
+                                    <span class="font-semibold">หญิง</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="sizeSelection" class="mt-4">
+                            <h4 class="text-md font-semibold text-gray-700 mb-2">📏 เลือกไซส์เสื้อ <a href="#" id="show-size-chart" class="text-purple-600 hover:underline">ดูตัวอย่างขนาดไซส์เสื้อ</a></h4>
+                            <div class="flex flex-wrap gap-3">
+                                <!-- Sizes will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
+                            <div class="flex items-center space-x-3">
+                                <button type="button" onclick="updateShirtQuantity(-1)" id="shirt-qty-minus" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
+                                <input type="number" id="shirtQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold">
+                                <button type="button" onclick="updateShirtQuantity(1)" id="shirt-qty-plus" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
+                            </div>
+                        </div>
+
+                        <div class="mt-6">
+                            <button id="addToCartBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-cart-plus"></i> เพิ่มลงตะกร้า
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         }
-        
-        // Update Combo Info
-        if(combo && bracelet && shirt) {
-            const discount = (parseFloat(bracelet.price) + parseFloat(shirt.price)) - parseFloat(combo.price);
-            if(comboSavingsSpan) comboSavingsSpan.textContent = `ประหยัด ฿${discount}`;
-            const comboDesc = document.getElementById('comboOption').parentElement.querySelector('.text-sm');
-            if(comboDesc) comboDesc.textContent = `เลือกทั้งสองอย่างเพื่อรับราคาพิเศษ ${parseFloat(combo.price)} บาท/ชุด! (ลด ${discount} บาท/ชุด)`;
-            const comboImage = document.getElementById('comboImage');
-            if (combo.image_url && comboImage) {
-                comboImage.src = combo.image_url;
-                comboImage.classList.remove('hidden');
+
+        // // Render Combo Product
+        // if (comboProduct && braceletProduct && shirtProduct) {
+        //     const originalPrice = parseFloat(braceletProduct.price) + parseFloat(shirtProduct.price);
+        //     const discount = comboProduct.discount_amount ? parseFloat(comboProduct.discount_amount) : originalPrice - parseFloat(comboProduct.price);
+        //     html += `
+        //     <div class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
+        //         <div class="flex items-center">
+        //             <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded" disabled>
+        //             <img id="comboImage" src="${comboProduct.image_url || ''}" alt="คอมโบพิเศษ" class="w-16 h-16 object-cover rounded-lg mr-4 ${comboProduct.image_url ? '' : 'hidden'}">
+        //             <div class="flex-1">
+        //                 <div class="font-semibold text-purple-800 text-base">🎁 ${comboProduct.name}: กำไลข้อมือ + เสื้อผ้า</div>
+        //                 <div class="text-sm text-purple-600">${comboProduct.description}</div>
+        //                 <div class="text-sm text-purple-600 mt-2">
+        //                     <strong>วิธีการคำนวณ:</strong> จำนวนชุดคอมโบ = จำนวนน้อยสุดระหว่างกำไลกับเสื้อทั้งหมดในตะกร้า
+        //                 </div>
+        //                 <div class="text-lg font-bold text-purple-700 mt-2" id="comboSavings">ประหยัด ฿${discount.toLocaleString()}!</div>
+        //             </div>
+        //         </div>
+        //     </div>`;
+        // }
+
+        container.innerHTML = html;
+
+        // Re-attach event listeners after rendering
+        const addBraceletToCartBtn = document.getElementById('addBraceletToCartBtn');
+        if (addBraceletToCartBtn) {
+            addBraceletToCartBtn.addEventListener('click', addBraceletToCart);
+        }
+        const addToCartBtn = document.getElementById('addToCartBtn');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', addToCart);
+        }
+        const braceletQtyMinus = document.getElementById('bracelet-qty-minus');
+        const braceletQtyPlus = document.getElementById('bracelet-qty-plus');
+        const braceletQtyInput = document.getElementById('braceletQty');
+        if (braceletQtyMinus) braceletQtyMinus.addEventListener('click', () => updateBraceletQuantity(-1));
+        if (braceletQtyPlus) braceletQtyPlus.addEventListener('click', () => updateBraceletQuantity(1));
+        if (braceletQtyInput) braceletQtyInput.addEventListener('change', () => {
+            if (parseInt(braceletQtyInput.value) < 1 || isNaN(parseInt(braceletQtyInput.value))) {
+                braceletQtyInput.value = 1;
             }
+        });
+
+        // Re-populate shirt sizes
+        const sizeContainer = document.querySelector('#sizeSelection .flex');
+        if(sizeContainer && shirtProduct) {
+            const sizesArray = shirtProduct.sizes ? shirtProduct.sizes.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+            sizeContainer.innerHTML = sizesArray.map(size => `
+                    <label class="flex items-center justify-center w-24 h-12 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors text-base">
+                        <input type="radio" name="size" value="${size}" class="sr-only">
+                        <span class="font-semibold">${size}</span>
+                    </label>`).join('');
+        }
+
+        // Re-attach gender/size selection listeners for shirt
+        document.body.addEventListener('change', (e) => { 
+            if (e.target.matches('input[name="size"]') || e.target.matches('input[name="gender"]')) {
+                const parentSelector = e.target.matches('input[name="size"]') ? '#sizeSelection' : '#genderSelection';
+                document.querySelectorAll(`${parentSelector} label`).forEach(label => { 
+                    label.classList.remove('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); 
+                    label.classList.add('border-gray-200'); 
+                }); 
+                const selectedLabel = e.target.parentElement; 
+                if (selectedLabel) { 
+                    selectedLabel.classList.add('border-purple-500', 'bg-purple-50', 'ring-2', 'ring-purple-300'); 
+                    selectedLabel.classList.remove('border-gray-200'); 
+                } 
+            } 
+        });
+
+        // Re-attach shirt quantity listeners
+        document.getElementById('shirt-qty-minus').addEventListener('click', () => {
+            const currentShirtQtyInput = document.getElementById('shirtQty');
+            if (!currentShirtQtyInput) return;
+            let val = parseInt(currentShirtQtyInput.value);
+            if (val > 1) currentShirtQtyInput.value = val - 1;
+        });
+        document.getElementById('shirt-qty-plus').addEventListener('click', () => {
+            const currentShirtQtyInput = document.getElementById('shirtQty');
+            if (!currentShirtQtyInput) return;
+            currentShirtQtyInput.value = parseInt(currentShirtQtyInput.value) + 1;
+        });
+
+        const showSizeChartLink = document.getElementById('show-size-chart');
+        if (showSizeChartLink) {
+            showSizeChartLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                Swal.fire({
+                    imageUrl: 'uploads/728125.jpg',
+                    imageAlt: 'ตารางขนาดเสื้อ',
+                    imageWidth: 400,
+                    width: '50%'
+                });
+            });
         }
     };
+
+    function updateNewOrderView(products) {
+        renderNewOrderProducts(products);
+    }
 
     const loadProductsAndRender = async () => {
         const container = document.getElementById('product-list-container');
@@ -409,7 +525,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const selectedGenderEl = document.querySelector('input[name="gender"]:checked');
         const selectedSizeEl = document.querySelector('input[name="size"]:checked');
-        const quantity = parseInt(shirtQtyInput.value);
+        
+        // หา shirtQtyInput ภายในฟังก์ชัน
+        const currentShirtQtyInput = document.getElementById('shirtQty');
+        const quantity = parseInt(currentShirtQtyInput ? currentShirtQtyInput.value : 1); // ใช้ค่าเริ่มต้น 1 ถ้าหาไม่เจอ
 
         if (!selectedGenderEl) {
             Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาเลือกเพศสำหรับเสื้อ' });
@@ -458,7 +577,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const bracelet = state.productList.find(p => p.category === 'bracelet');
         if (!bracelet) return;
 
-        const quantity = parseInt(braceletQtyInput.value); // Get quantity from input
+        // หา braceletQtyInput ภายในฟังก์ชัน
+        const currentBraceletQtyInput = document.getElementById('braceletQty');
+        const quantity = parseInt(currentBraceletQtyInput ? currentBraceletQtyInput.value : 1); // ใช้ค่าเริ่มต้น 1 ถ้าหาไม่เจอ
+
         if (isNaN(quantity) || quantity < 1) {
             Swal.fire({ icon: 'warning', title: 'โปรดทราบ', text: 'กรุณาระบุจำนวนที่ถูกต้องสำหรับกำไลข้อมือ' });
             return;
@@ -488,10 +610,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateBraceletQuantity = (change) => {
-        let currentValue = parseInt(braceletQtyInput.value);
+        const currentBraceletQtyInput = document.getElementById('braceletQty');
+        if (!currentBraceletQtyInput) return; // เพิ่ม null check
+
+        let currentValue = parseInt(currentBraceletQtyInput.value);
         currentValue += change;
         if (currentValue < 1) currentValue = 1;
-        braceletQtyInput.value = currentValue;
+        currentBraceletQtyInput.value = currentValue;
     };
 
     window.removeFromCart = (cartItemId) => {
@@ -611,7 +736,19 @@ document.addEventListener('DOMContentLoaded', () => {
         viewToShow.classList.remove('hidden');
     };
 
-    const showStep = (stepNumber) => { steps.forEach((step, index) => { step.classList.toggle('hidden', index + 1 !== stepNumber); }); };
+    const showStep = (stepNumber) => {
+        steps.forEach((step, index) => {
+            if (step) { // Add null check for step
+                step.classList.toggle('hidden', index + 1 !== stepNumber);
+            }
+        });
+
+        step1RelatedElements.forEach(element => {
+            if (element) { // Add null check for element
+                element.classList.toggle('hidden', stepNumber !== 1);
+            }
+        });
+    };
 
     window.switchToProductsView = () => {
         state.currentView = 'products';
@@ -627,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset order
         state.order = { items: [], customer: {}, payment: {}, total_amount: 0, discount_amount: 0, final_amount: 0 };
 
-        shirtQtyInput.value = 1;
+
         document.querySelectorAll('input[name="gender"]:checked').forEach(radio => radio.checked = false);
         document.querySelectorAll('input[name="size"]:checked').forEach(radio => radio.checked = false);
         
@@ -914,45 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.ordersDebounceTimeout = setTimeout(loadAndRenderOrders, 500);
         });
 
-                        // New Listeners
-                        document.getElementById('bracelet-qty-minus').addEventListener('click', () => {
-                            updateBraceletQuantity(-1);
-                        });
-                        document.getElementById('bracelet-qty-plus').addEventListener('click', () => {
-                            updateBraceletQuantity(1);
-                        });
-                        braceletQtyInput.addEventListener('change', () => {
-                            // Ensure quantity is at least 1
-                            if (parseInt(braceletQtyInput.value) < 1 || isNaN(parseInt(braceletQtyInput.value))) {
-                                braceletQtyInput.value = 1;
-                            }
-                        });
-                
-                        if (addBraceletToCartBtn) { // Check if the button exists
-                            addBraceletToCartBtn.addEventListener('click', addBraceletToCart);
-                        }
-                        addToCartBtn.addEventListener('click', addToCart);
-        document.getElementById('shirt-qty-minus').addEventListener('click', () => {
-            let val = parseInt(shirtQtyInput.value);
-            if (val > 1) shirtQtyInput.value = val - 1;
-        });
-        document.getElementById('shirt-qty-plus').addEventListener('click', () => {
-            shirtQtyInput.value = parseInt(shirtQtyInput.value) + 1;
-        });
-
-
-        const showSizeChartLink = document.getElementById('show-size-chart');
-        if (showSizeChartLink) {
-            showSizeChartLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                Swal.fire({
-                    imageUrl: 'uploads/728125.jpg',
-                    imageAlt: 'ตารางขนาดเสื้อ',
-                    imageWidth: 400,
-                    width: '50%'
-                });
-            });
-        }
+                        
 
         switchToProductsView();
         loadProductsAndRender();
