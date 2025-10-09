@@ -139,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (order.payment_confirmation_status === 'รอตรวจสอบ' && order.slip_filename) {
                         actionsHtml += `<button class="btn btn-success btn-sm approve-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-check"></i> อนุมัติ</button>`;
                     }
+                    // Show unapprove button if order is 'ชำระเงินแล้ว' (meaning it was approved)
                     else if (order.order_status === 'ชำระเงินแล้ว') {
                         actionsHtml += `<button class="btn btn-danger btn-sm unapprove-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-times"></i> ยกเลิกอนุมัติ</button>`;
                     }
@@ -150,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         statusBadge,
                         order.payment_method,
                         order.order_created_at,
+                        order.approver_name || '-',
                         actionsHtml
                     ];
                 });
@@ -163,6 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         { title: "สถานะ" },
                         { title: "วิธีชำระเงิน" },
                         { title: "วันที่สั่งซื้อ" },
+                        { title: "ผู้อนุมัติ" },
                         { title: "การดำเนินการ" }
                     ],
                     destroy: true,

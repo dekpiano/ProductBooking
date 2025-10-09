@@ -58,13 +58,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response['success'] = true;
             $response['message'] = 'Payment approved and order status updated successfully.';
         } else if ($action === 'unapprove') {
+            // First, check if the current admin is the one who approved it.
+            $stmt_check = $conn->prepare("SELECT verified_by FROM tb_payment_confirmations WHERE order_id = ? AND status = 'อนุมัติ'");
+            $stmt_check->bind_param("s", $orderId);
+            $stmt_check->execute();
+            $result = $stmt_check->get_result();
+            $confirmation = $result->fetch_assoc();
+            $stmt_check->close();
+
+            if (!$confirmation) {
+                throw new Exception("Payment confirmation not found or not in 'อนุมัติ' status.");
+            }
+
+            if ($confirmation['verified_by'] != $adminId) {
+                throw new Exception("คุณไม่มีสิทธิ์ยกเลิกการอนุมัติรายการนี้ เฉพาะผู้อนุมัติเดิมเท่านั้นที่ทำได้");
+            }
+
             // 1. Update order status in tb_orders (revert to 'รอตรวจสอบการชำระเงิน')
             $stmt_order = $conn->prepare("UPDATE tb_orders SET status = 'รอตรวจสอบการชำระเงิน' WHERE id = ? AND status = 'ชำระเงินแล้ว'");
             $stmt_order->bind_param("s", $orderId);
             $stmt_order->execute();
 
             if ($stmt_order->affected_rows === 0) {
-                throw new Exception("Order not found or not in 'รอจัดส่ง' status.");
+                throw new Exception("Order not found or not in 'ชำระเงินแล้ว' status.");
             }
             $stmt_order->close();
 
@@ -74,7 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt_payment_conf->execute();
 
             if ($stmt_payment_conf->affected_rows === 0) {
-                throw new Exception("Payment confirmation not found or not in 'อนุมัติ' status.");
+                // This might happen if the previous check passed but something changed in between. It's a good safeguard.
+                throw new Exception("Payment confirmation not found or not in 'อนุมัติ' status during update.");
             }
             $stmt_payment_conf->close();
 

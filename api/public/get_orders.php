@@ -36,7 +36,15 @@ try {
             c.last_name, 
             c.phone,
             (
-                SELECT GROUP_CONCAT(oi.product_name, ' x', oi.quantity SEPARATOR ', ')
+                SELECT GROUP_CONCAT(
+                    CONCAT(
+                        oi.product_name, 
+                        IF(oi.size IS NOT NULL AND oi.size != '', CONCAT(' (', oi.gender, ', ไซส์ ', oi.size, ')'), ''),
+                        ' x', 
+                        oi.quantity
+                    ) 
+                    SEPARATOR '<br>'
+                )
                 FROM tb_order_items oi
                 WHERE oi.order_id = o.id
             ) AS items_summary

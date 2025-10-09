@@ -38,13 +38,17 @@ try {
                 pc.from_account_name,
                 pc.slip_filename,
                 pc.slip_path,
-                pc.status AS payment_confirmation_status
+                pc.status AS payment_confirmation_status,
+                p.full_name AS approver_name,
+                pc.verified_by
             FROM
                 tb_orders o
             JOIN
                 tb_customers c ON o.customer_id = c.id
             LEFT JOIN
-                tb_payment_confirmations pc ON o.id = pc.order_id";
+                tb_payment_confirmations pc ON o.id = pc.order_id
+            LEFT JOIN
+                tb_admin_users p ON pc.verified_by = p.id";
 
     if (isset($_GET['order_id'])) {
         // Fetch single order

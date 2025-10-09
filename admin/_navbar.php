@@ -18,8 +18,7 @@
                 <span class="mr-2 d-none d-lg-inline text-gray-600 small">
                     ยินดีต้อนรับ, <?php echo htmlspecialchars($_SESSION['admin_username']); ?>
                 </span>
-                <img class="img-profile rounded-circle"
-                    src="img/undraw_profile.svg">
+                <i class="fas fa-user-circle fa-2x text-gray-600"></i>
             </a>
             <!-- Dropdown - User Information -->
             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
