@@ -23,14 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
     $category_id = $_POST['category_id'] ?? null;
     $price = $_POST['price'] ?? 0;
-    $description = empty($_POST['description']) ? NULL : $_POST['description'];
-    $material = empty($_POST['material']) ? NULL : $_POST['material'];
-    $sizes = empty($_POST['sizes']) ? NULL : $_POST['sizes'];
-    $colors = empty($_POST['colors']) ? NULL : $_POST['colors'];
+    $description = $_POST['description'] ?? null;
+    $material = $_POST['material'] ?? null; // Added material
+    $stock = $_POST['stock'] ?? 0;
+    $is_active = $_POST['is_active'] ?? 1;
+    $sizes = $_POST['sizes'] ?? null;
+    $colors = $_POST['colors'] ?? null;
     $discount_amount = $_POST['discount_amount'] ?? 0.00;
     $image_url = null; // Initialize image_url
-    $stock = $_POST['stock'] ?? null;
-    $is_active = $_POST['is_active'] ?? null;
 
     // Basic validation
     if (empty($id) || empty($name) || empty($category_id) || !is_numeric($price) || $price < 0) {
@@ -68,11 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            $image_url = $newFileName; // Path to store in DB
+            $image_url = 'uploads/products/' . $newFileName; // Path to store in DB
 
             // Optional: Delete old image if it exists
-            if ($current_image_url && file_exists('../uploads/products/' . $current_image_url)) {
-                unlink('../uploads/products/' . $current_image_url);
+            if ($current_image_url && file_exists('../../' . $current_image_url)) {
+                unlink('../../' . $current_image_url);
             }
         } else {
             $response['message'] = 'Failed to upload new image.';
@@ -82,21 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // First, check if the product exists
-        $stmt_check = $conn->prepare("SELECT id FROM tb_products WHERE id = ?");
-        $stmt_check->bind_param("i", $id);
-        $stmt_check->execute();
-        $stmt_check->store_result();
-
-        if ($stmt_check->num_rows === 0) {
-            $response['message'] = 'Product not found.';
-            echo json_encode($response);
-            exit;
-        }
-        $stmt_check->close();
-
         $stmt = $conn->prepare("UPDATE tb_products SET name = ?, category_id = ?, price = ?, description = ?, material = ?, image_url = ?, stock = ?, is_active = ?, sizes = ?, colors = ?, discount_amount = ? WHERE id = ?");
-        $stmt->bind_param("sidsssiissdi", $name, $category_id, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount, $id);
+        $stmt->bind_param("sidsissisidi", $name, $category_id, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount, $id);
 
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {

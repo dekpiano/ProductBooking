@@ -149,7 +149,7 @@ include('_head.php');
 
     <!-- Page level custom scripts -->
     <script src="js/demo/datatables-demo.js"></script>
-    <script src="js/payment_methods.js"></script> <!-- New JS for payment methods management -->
+    
 
 </body>
 
