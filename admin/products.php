@@ -74,11 +74,9 @@ include '_head.php';
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="form-group">
-                            <label for="category">หมวดหมู่</label>
-                            <select class="form-control" id="category" name="category" required>
-                                <option value="bracelet">สร้อยข้อมือ</option>
-                                <option value="shirt">เสื้อ</option>
-                                <option value="combo">ชุดคอมโบ</option>
+                            <label for="category_id">หมวดหมู่</label>
+                            <select class="form-control" id="category_id" name="category_id" required>
+                                <option value="">-- เลือกหมวดหมู่ --</option>
                             </select>
                         </div>
                         <div class="form-group">

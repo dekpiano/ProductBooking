@@ -12,7 +12,7 @@ if (!$conn) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
     $value = $_POST['value'] ?? '';
-    $icon = $_POST['icon'] ?? '';
+    $icon = empty($_POST['icon']) ? NULL : trim($_POST['icon']);
 
     if (empty($name) || empty($value)) {
         $response['message'] = 'Name and Value are required.';

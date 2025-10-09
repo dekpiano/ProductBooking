@@ -46,12 +46,13 @@ try {
                         oi.quantity,
                         oi.unit_price,
                         p.name AS product_name,
-                        p.category,
+                        c.name AS category,
                         p.image_url,
                         oi.gender,
                         oi.size
                       FROM tb_order_items oi
                       JOIN tb_products p ON oi.product_id = p.id
+                      LEFT JOIN tb_categories c ON p.category_id = c.id
                       WHERE oi.order_id = ?";
         $stmt_items = $conn->prepare($sql_items);
         $stmt_items->bind_param("s", $order_id);

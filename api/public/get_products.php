@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-require_once '../shared/db_connect.php';
+require_once __DIR__ . '/../shared/db_connect.php';
 
 $response = [
     'success' => false,
@@ -20,14 +20,14 @@ try {
     // The $conn variable should be available from db_connect.php
     // No need for $conn = null; or mysqli_report(...) here
 
-    $query = "SELECT * FROM tb_products WHERE is_active = 1 ORDER BY id ASC";
+    $query = "SELECT p.*, c.slug AS category FROM tb_products p LEFT JOIN tb_categories c ON p.category_id = c.id WHERE p.is_active = 1 ORDER BY p.id ASC";
     $result = $conn->query($query);
 
     $products = [];
     while ($row = $result->fetch_assoc()) {
-        // Decode JSON fields for sizes and colors
-        // $row['sizes'] = json_decode($row['sizes']); // No longer JSON
-        // $row['colors'] = json_decode($row['colors']); // No longer JSON
+        if (!empty($row['image_url'])) {
+            $row['image_url'] = 'uploads/products/' . $row['image_url'];
+        }
         $products[] = $row;
     }
 

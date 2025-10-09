@@ -16,10 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? '';
     $name = $_POST['name'] ?? '';
     $type = $_POST['type'] ?? '';
-    $account_name = $_POST['account_name'] ?? NULL;
-    $account_number = $_POST['account_number'] ?? NULL;
-    $bank_name = $_POST['bank_name'] ?? NULL;
-    $promptpay_id = $_POST['promptpay_id'] ?? NULL;
+    $account_name = empty($_POST['account_name']) ? NULL : $_POST['account_name'];
+    $account_number = empty($_POST['account_number']) ? NULL : $_POST['account_number'];
+    $bank_name = empty($_POST['bank_name']) ? NULL : $_POST['bank_name'];
+    $promptpay_id = empty($_POST['promptpay_id']) ? NULL : $_POST['promptpay_id'];
     $qr_code_image = $_POST['qr_code_image'] ?? NULL; // Default to existing value if not uploading new
     $is_active = isset($_POST['is_active']) ? 1 : 0;
 
@@ -70,6 +70,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
+        // First, check if the payment method exists
+        $stmt_check = $conn->prepare("SELECT id FROM tb_payment_methods WHERE id = ?");
+        $stmt_check->bind_param("i", $id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+
+        if ($stmt_check->num_rows === 0) {
+            $response['message'] = 'Payment method not found.';
+            echo json_encode($response);
+            exit;
+        }
+        $stmt_check->close();
+
         $stmt = $conn->prepare("UPDATE tb_payment_methods SET name = ?, type = ?, account_name = ?, account_number = ?, bank_name = ?, promptpay_id = ?, qr_code_image = ?, is_active = ? WHERE id = ?");
         $stmt->bind_param("sssssssii", $name, $type, $account_name, $account_number, $bank_name, $promptpay_id, $qr_code_image, $is_active, $id);
 

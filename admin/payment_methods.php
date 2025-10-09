@@ -90,14 +90,14 @@ include('_head.php');
                 </div>
                 <div class="modal-body">
                     <form id="paymentMethodForm">
-                        <input type="hidden" id="paymentMethodId">
+                        <input type="hidden" id="paymentMethodId" name="id">
                         <div class="form-group">
                             <label for="paymentMethodName">ชื่อ</label>
-                            <input type="text" class="form-control" id="paymentMethodName" required>
+                            <input type="text" class="form-control" id="paymentMethodName" name="name" required>
                         </div>
                         <div class="form-group">
                             <label for="paymentMethodType">ประเภท</label>
-                            <select class="form-control" id="paymentMethodType" required>
+                            <select class="form-control" id="paymentMethodType" name="type" required>
                                 <option value="">เลือกประเภท</option>
                                 <option value="bank_transfer">โอนเงินผ่านธนาคาร</option>
                                 <option value="promptpay">พร้อมเพย์</option>
@@ -106,32 +106,32 @@ include('_head.php');
                         <div id="bankTransferFields" class="d-none">
                             <div class="form-group">
                                 <label for="accountName">ชื่อบัญชี</label>
-                                <input type="text" class="form-control" id="accountName">
+                                <input type="text" class="form-control" id="accountName" name="account_name">
                             </div>
                             <div class="form-group">
                                 <label for="accountNumber">เลขที่บัญชี</label>
-                                <input type="text" class="form-control" id="accountNumber">
+                                <input type="text" class="form-control" id="accountNumber" name="account_number">
                             </div>
                             <div class="form-group">
                                 <label for="bankName">ชื่อธนาคาร</label>
-                                <input type="text" class="form-control" id="bankName">
+                                <input type="text" class="form-control" id="bankName" name="bank_name">
                             </div>
                         </div>
                         <div id="promptpayFields" class="d-none">
                             <div class="form-group">
                                 <label for="promptpayId">PromptPay ID</label>
-                                <input type="text" class="form-control" id="promptpayId">
+                                <input type="text" class="form-control" id="promptpayId" name="promptpay_id">
                             </div>
                             <div class="form-group">
                                 <label for="qrCodeImage">QR Code Image</label>
-                                <input type="file" class="form-control-file" id="qrCodeImage" accept="image/*">
+                                <input type="file" class="form-control-file" id="qrCodeImage" name="qrCodeImage" accept="image/*">
                                 <small class="form-text text-muted">อัปโหลดไฟล์รูปภาพ QR Code</small>
                                 <div id="currentQrCodeImage" class="mt-2"></div>
                             </div>
                         </div>
                         <div class="form-group">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                <input class="form-check-input" type="checkbox" id="isActive" name="is_active" checked>
                                 <label class="form-check-label" for="isActive">
                                     ใช้งานอยู่
                                 </label>

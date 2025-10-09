@@ -21,19 +21,19 @@ if (!isset($_SESSION['admin_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? null;
     $name = $_POST['name'] ?? '';
-    $category = $_POST['category'] ?? '';
+    $category_id = $_POST['category_id'] ?? null;
     $price = $_POST['price'] ?? 0;
-    $description = $_POST['description'] ?? null;
-    $material = $_POST['material'] ?? null; // Added material
-    $stock = $_POST['stock'] ?? 0;
-    $is_active = $_POST['is_active'] ?? 1;
-    $sizes = $_POST['sizes'] ?? null;
-    $colors = $_POST['colors'] ?? null;
+    $description = empty($_POST['description']) ? NULL : $_POST['description'];
+    $material = empty($_POST['material']) ? NULL : $_POST['material'];
+    $sizes = empty($_POST['sizes']) ? NULL : $_POST['sizes'];
+    $colors = empty($_POST['colors']) ? NULL : $_POST['colors'];
     $discount_amount = $_POST['discount_amount'] ?? 0.00;
     $image_url = null; // Initialize image_url
+    $stock = $_POST['stock'] ?? null;
+    $is_active = $_POST['is_active'] ?? null;
 
     // Basic validation
-    if (empty($id) || empty($name) || empty($category) || !is_numeric($price) || $price < 0) {
+    if (empty($id) || empty($name) || empty($category_id) || !is_numeric($price) || $price < 0) {
         $response['message'] = 'Product ID, name, category, and a valid price are required.';
         echo json_encode($response);
         exit;
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle image upload
     if (isset($_FILES['productImage']) && $_FILES['productImage']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../uploads/products/'; // Relative path to the uploads directory
+        $uploadDir = '../../uploads/products/'; // Relative path to the uploads directory
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -68,11 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            $image_url = 'uploads/products/' . $newFileName; // Path to store in DB
+            $image_url = $newFileName; // Path to store in DB
 
             // Optional: Delete old image if it exists
-            if ($current_image_url && file_exists('../' . $current_image_url)) {
-                unlink('../' . $current_image_url);
+            if ($current_image_url && file_exists('../uploads/products/' . $current_image_url)) {
+                unlink('../uploads/products/' . $current_image_url);
             }
         } else {
             $response['message'] = 'Failed to upload new image.';
@@ -82,8 +82,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $conn->prepare("UPDATE tb_products SET name = ?, category = ?, price = ?, description = ?, material = ?, image_url = ?, stock = ?, is_active = ?, sizes = ?, colors = ?, discount_amount = ? WHERE id = ?");
-        $stmt->bind_param("ssdsississsi", $name, $category, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount, $id);
+        // First, check if the product exists
+        $stmt_check = $conn->prepare("SELECT id FROM tb_products WHERE id = ?");
+        $stmt_check->bind_param("i", $id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+
+        if ($stmt_check->num_rows === 0) {
+            $response['message'] = 'Product not found.';
+            echo json_encode($response);
+            exit;
+        }
+        $stmt_check->close();
+
+        $stmt = $conn->prepare("UPDATE tb_products SET name = ?, category_id = ?, price = ?, description = ?, material = ?, image_url = ?, stock = ?, is_active = ?, sizes = ?, colors = ?, discount_amount = ? WHERE id = ?");
+        $stmt->bind_param("sidsssiissdi", $name, $category_id, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount, $id);
 
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {

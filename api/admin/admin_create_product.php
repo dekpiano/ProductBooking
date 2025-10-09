@@ -20,7 +20,7 @@ if (!isset($_SESSION['admin_id'])) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'] ?? '';
-    $category = $_POST['category'] ?? '';
+    $category_id = $_POST['category_id'] ?? null;
     $price = $_POST['price'] ?? 0;
     $description = $_POST['description'] ?? null;
     $material = $_POST['material'] ?? null; // Added material
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $image_url = null; // Initialize image_url
 
     // Basic validation
-    if (empty($name) || empty($category) || !is_numeric($price) || $price < 0) {
+    if (empty($name) || empty($category_id) || !is_numeric($price) || $price < 0) {
         $response['message'] = 'Product name, category, and a valid price are required.';
         echo json_encode($response);
         exit;
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Handle image upload
     if (isset($_FILES['productImage']) && $_FILES['productImage']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../uploads/products/'; // Relative path to the uploads directory
+        $uploadDir = '../../uploads/products/'; // Relative path to the uploads directory
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $destPath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($fileTmpPath, $destPath)) {
-            $image_url = 'uploads/products/' . $newFileName; // Path to store in DB
+            $image_url = $newFileName; // Path to store in DB
         } else {
             $response['message'] = 'Failed to upload image.';
             echo json_encode($response);
@@ -65,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $stmt = $conn->prepare("INSERT INTO tb_products (name, category, price, description, material, image_url, stock, is_active, sizes, colors, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdsississs", $name, $category, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount);
+        $stmt = $conn->prepare("INSERT INTO tb_products (name, category_id, price, description, material, image_url, stock, is_active, sizes, colors, discount_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sidsssiissd", $name, $category_id, $price, $description, $material, $image_url, $stock, $is_active, $sizes, $colors, $discount_amount);
 
         if ($stmt->execute()) {
             $response['success'] = true;

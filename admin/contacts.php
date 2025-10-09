@@ -106,18 +106,18 @@ include('_head.php');
                 </div>
                 <div class="modal-body">
                     <form id="contactForm">
-                        <input type="hidden" id="contactId">
+                        <input type="hidden" id="contactId" name="id">
                         <div class="form-group">
                             <label for="contactName">ชื่อ</label>
-                            <input type="text" class="form-control" id="contactName" required>
+                            <input type="text" class="form-control" id="contactName" name="name" required>
                         </div>
                         <div class="form-group">
                             <label for="contactValue">ค่า</label>
-                            <input type="text" class="form-control" id="contactValue" required>
+                            <input type="text" class="form-control" id="contactValue" name="value" required>
                         </div>
                         <div class="form-group">
                             <label for="contactIcon">ไอคอน (Font Awesome Class)</label>
-                            <input type="text" class="form-control" id="contactIcon"
+                            <input type="text" class="form-control" id="contactIcon" name="icon"
                                 placeholder="เช่น fas fa-phone, fab fa-line">
                         </div>
                         <div class="modal-footer">

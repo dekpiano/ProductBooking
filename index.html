@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 
 
     <!-- Google Fonts: Anuphan -->
@@ -16,13 +17,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@100..700&display=swap" rel="stylesheet">
 
     <style>
-        html, body, [class*="font-"] {
+        *,html, body, [class*="font-"] {
             font-family: 'Anuphan', sans-serif;
         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800 break-words">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 max-w-7xl">
+    <div class=" mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 max-w-7xl">
         <!-- Header -->
         <header class="text-center mb-8 md:mb-12">
             <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-purple-800 mb-2">ระบบจองของที่ระลึก</h1>
@@ -93,13 +94,13 @@
                     <table class="min-w-full divide-y divide-gray-200" id="ordersTable">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หมายเลขคำสั่งซื้อ</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ชื่อลูกค้า</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">เบอร์โทร</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ของที่ระลึก</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ยอดรวม</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">สถานะ</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วันที่สั่ง</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">หมายเลขคำสั่งซื้อ</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">ชื่อลูกค้า</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">เบอร์โทร</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">ของที่ระลึก</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">ยอดรวม</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">สถานะ</th>
+                                <th scope="col" class="px-6 py-3 text-left   text-gray-500 uppercase tracking-wider">วันที่สั่ง</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="ordersTableBody"></tbody>
@@ -123,87 +124,36 @@
                         <span class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
                         เลือกของที่ระลึก
                     </h2>
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">📿 กำไลข้อมือ</h3>
-                            <div class="space-y-3">
-                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                                    <input type="checkbox" id="braceletCheckbox" value="rubber-bracelet" class="mr-3 w-5 h-5 text-purple-500 rounded">
-                                    <img id="braceletImage" src="" alt="กำไลข้อมือ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
-                                    <div class="flex-1">
-                                        <div class="font-medium">กำไลข้อมือยาง</div>
-                                        <div class="text-sm text-gray-500">กำไลข้อมือยางคุณภาพดี</div>
-                                        <div class="text-purple-600 font-semibold">฿100 / ชิ้น</div>
-                                    </div>
-                                </label>
-                                <div id="braceletQuantity" class="mt-3 hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                                    <div class="flex items-center space-x-3">
-                                        <button type="button" onclick="updateQuantity('bracelet', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
-                                        <input type="number" id="braceletQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('bracelet', 0)">
-                                        <button type="button" onclick="updateQuantity('bracelet', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">👕 เสื้อผ้า</h3>
-                            <div class="space-y-3">
-                                <label class="flex items-center p-4 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                                    <input type="checkbox" id="shirtCheckbox" value="shirt" class="mr-3 w-5 h-5 text-purple-500 rounded">
-                                    <img id="shirtImage" src="" alt="เสื้อผ้า" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
-                                    <div class="flex-1">
-                                        <div class="font-medium">เสื้อผ้า</div>
-                                        <div class="text-sm text-gray-500">เสื้อผ้าคุณภาพดี</div>
-                                        <div class="text-purple-600 font-semibold">฿300 / ตัว</div>
-                                    </div>
-                                </label>
-                                <div id="shirtQuantity" class="mt-3 hidden">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">จำนวน</label>
-                                    <div class="flex items-center space-x-3">
-                                        <button type="button" onclick="updateQuantity('shirt', -1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">-</button>
-                                        <input type="number" id="shirtQty" value="1" min="1" class="w-20 text-center border border-gray-300 rounded-lg py-2 font-semibold" onchange="updateQuantity('shirt', 0)">
-                                        <button type="button" onclick="updateQuantity('shirt', 1)" class="w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-lg flex items-center justify-center font-bold text-gray-600 transition-colors">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div id="new-order-product-selection">
+                        <p class="text-center text-gray-500 py-8 col-span-full">กำลังโหลดรายการของที่ระลึก...</p>
                     </div>
-                    <!-- Gender Selection -->
-                    <div id="genderSelection" class="mt-8 hidden">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">🚻 เลือกเพศ</h3>
-                        <div class="flex flex-wrap gap-3">
-                            <label class="flex items-center justify-center w-24 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                                <input type="radio" name="gender" value="male" class="sr-only">
-                                <span class="font-semibold">ชาย</span>
-                            </label>
-                            <label class="flex items-center justify-center w-24 h-16 border-2 border-gray-200 rounded-lg hover:border-purple-300 cursor-pointer transition-colors">
-                                <input type="radio" name="gender" value="female" class="sr-only">
-                                <span class="font-semibold">หญิง</span>
-                            </label>
+
+                    <!-- Cart Display -->
+                    <div id="cartContainer" class="mt-8">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">🛒 ตะกร้าสินค้าของคุณ</h3>
+                        <div id="cartItems" class="space-y-4">
+                            <!-- Cart items will be populated by JS -->
+                            <p class="text-center text-gray-500 py-4">ตะกร้าของคุณว่างเปล่า</p>
                         </div>
                     </div>
 
-                    <div id="sizeSelection" class="mt-8 hidden">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">📏 เลือกไซส์เสื้อ  <a href="#" id="show-size-chart" class="text-purple-600 hover:underline">ดูตัวอย่างไซต์เสื้อ</a></h3>
-                        <div class="flex flex-wrap gap-3">
-                            <!-- Sizes will be populated by JS -->
-                        </div>
-                    </div>
                     <div class="mt-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200">
                         <div class="flex items-center">
-                            <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded" disabled>
+                            <input type="checkbox" id="comboOption" class="mr-4 w-5 h-5 text-purple-500 rounded">
                             <img id="comboImage" src="" alt="คอมโบพิเศษ" class="w-16 h-16 object-cover rounded-lg mr-4 hidden">
                             <div class="flex-1">
                                 <div class="font-semibold text-purple-800">🎁 คอมโบพิเศษ: กำไลข้อมือ + เสื้อผ้า</div>
                                 <div class="text-sm text-purple-600"></div>
                                 <div class="text-sm text-purple-600 mt-1">
-                                    <strong>วิธีการคำนวณ:</strong> จำนวนชุดคอมโบ = จำนวนน้อยสุดระหว่างกำไลกับเสื้อ
+                                    <strong>วิธีการคำนวณ:</strong> จำนวนชุดคอมโบ = จำนวนน้อยสุดระหว่างกำไลกับเสื้อทั้งหมดในตะกร้า
                                 </div>
                                 <div class="text-lg font-bold text-purple-700 mt-1" id="comboSavings"></div>
                             </div>
                         </div>
                     </div>
+
+
+
                     <div class="mt-6 p-4 bg-gray-50 rounded-lg">
                         <div class="text-lg font-semibold text-gray-800">สรุปราคา</div>
                         <div id="priceBreakdown" class="mt-2 space-y-1 text-sm text-gray-600">
@@ -426,8 +376,21 @@
                     </div>
                 </div>
             </div>
+           
         </main>
+         <footer class="border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+            <p class="text-sm">
+                &copy; 2025 ระบบจองของที่ระลึก "ร้อยดวงใจแห่งรัก" คืนสู่เหย้าชาว จ.ป. จ.ว. และ สกจ. All Rights Reserved.
+            </p>
+            <p class="text-sm mt-2">
+                Developed by <a href="https://www.facebook.com/dekpiano" class="text-purple-600 hover:underline">Dekpiano</a>
+            </p>
+        </div>
+    </footer>
     </div>
+
+    
 
     <!-- Payment Details Modal -->
     <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">

@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'] ?? '';
     $name = $_POST['name'] ?? '';
     $value = $_POST['value'] ?? '';
-    $icon = $_POST['icon'] ?? '';
+    $icon = empty($_POST['icon']) ? NULL : $_POST['icon'];
 
     if (empty($id) || empty($name) || empty($value)) {
         $response['message'] = 'ID, Name, and Value are required.';

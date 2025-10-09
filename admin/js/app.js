@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productForm = document.getElementById('productForm');
     const productIdInput = document.getElementById('productId');
     const productNameInput = document.getElementById('name');
-    const productCategoryInput = document.getElementById('category');
+    const productCategoryInput = document.getElementById('category_id');
     const productPriceInput = document.getElementById('price');
     const productDescriptionInput = document.getElementById('description');
     const productStockInput = document.getElementById('stock');
@@ -27,6 +27,25 @@ document.addEventListener('DOMContentLoaded', function() {
     let productsDataTable;
     let ordersDataTable;
 
+    // --- Category Management Functions ---
+    async function loadCategories() {
+        try {
+            const response = await fetch('../api/admin/admin_get_categories.php');
+            const data = await response.json();
+            if (data.success) {
+                productCategoryInput.innerHTML = '<option value="">-- เลือกหมวดหมู่ --</option>';
+                data.data.forEach(category => {
+                    const option = new Option(category.name, category.id);
+                    productCategoryInput.add(option);
+                });
+            } else {
+                console.error('Failed to load categories:', data.message);
+            }
+        } catch (error) {
+            console.error('Error loading categories:', error);
+        }
+    }
+
     // --- Product Management Functions ---
     async function fetchProducts() {
         const productsTable = $('#productsTable');
@@ -40,11 +59,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 if ($.fn.DataTable.isDataTable('#productsTable')) {
                     productsTable.DataTable().destroy();
                 }
-                // productsTableBody.innerHTML = ''; // No need to clear innerHTML if using DataTable's data option
-
+                
                 const productsData = data.products.map(product => {
                     const imageUrlHtml = product.image_url ?
-                        `<img src="../${product.image_url}" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;">` :
+                        `<img src="../uploads/products/${product.image_url}" alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;">` :
                         'ไม่มีรูป';
                     const statusText = product.is_active == 1 ? 'ใช้งาน' : 'ไม่ใช้งาน';
                     const actionsHtml = `
@@ -55,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         product.id,
                         imageUrlHtml, // Image column
                         product.name,
-                        product.category,
+                        product.category_name, // Use category_name
                         parseFloat(product.price).toFixed(2),
                         product.stock,
                         statusText,
@@ -67,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     data: productsData,
                     columns: [
                         { title: "ID" },
-                        { title: "รูปภาพ" }, // New column for image
+                        { title: "รูปภาพ" },
                         { title: "ชื่อสินค้า" },
                         { title: "หมวดหมู่" },
                         { title: "ราคา" },
@@ -118,11 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (order.slip_filename) {
                         actionsHtml += `<button class="btn btn-info btn-sm view-slip-btn mr-2" data-order-id="${order.order_id}"><i class="fas fa-eye"></i> ดูสลิป</button>`;
                     }
-                    // Show approve button only if payment confirmation is 'รอตรวจสอบ'
                     if (order.payment_confirmation_status === 'รอตรวจสอบ' && order.slip_filename) {
                         actionsHtml += `<button class="btn btn-success btn-sm approve-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-check"></i> อนุมัติ</button>`;
                     }
-                    // Show unapprove button if order is 'ชำระเงินแล้ว' (meaning it was approved)
                     else if (order.order_status === 'ชำระเงินแล้ว') {
                         actionsHtml += `<button class="btn btn-danger btn-sm unapprove-payment-btn" data-order-id="${order.order_id}"><i class="fas fa-times"></i> ยกเลิกอนุมัติ</button>`;
                     }
@@ -167,16 +183,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Event Listeners for Product Management ---
     if (productsTableBody) {
         fetchProducts();
+        loadCategories(); // Load categories on page load
 
         // Handle Add New Product button click
         $('[data-target="#productModal"]').on('click', function() {
             productForm.reset();
             productIdInput.value = '';
             document.getElementById('productModalLabel').textContent = 'เพิ่มสินค้าใหม่';
-            productModalElement.modal('show'); // Show Bootstrap 4 modal
+            $('#currentProductImage').html('');
+            productModalElement.modal('show');
         });
 
-        $(productsTableBody).on('click', '.edit-btn', async function() {
+        $('#productsTable').on('click', '.edit-btn', async function() {
             const productId = $(this).data('id');
             try {
                 const response = await fetch(`../api/admin/admin_get_products.php?id=${productId}`);
@@ -186,32 +204,30 @@ document.addEventListener('DOMContentLoaded', function() {
                     const product = data.products[0];
                     productIdInput.value = product.id;
                     productNameInput.value = product.name;
-                    productCategoryInput.value = product.category;
+                    productCategoryInput.value = product.category_id; // Set category_id
                     productPriceInput.value = parseFloat(product.price).toFixed(2);
                     productDescriptionInput.value = product.description || '';
                     productStockInput.value = product.stock;
                     productIsActiveInput.value = product.is_active;
                     productSizesInput.value = product.sizes || '';
-    document.getElementById('colors').value = product && product.colors ? product.colors : '';
-    document.getElementById('material').value = product ? product.material : ''; // Set material
-    document.getElementById('discount_amount').value = product ? product.discount_amount : 0.00; // Set discount_amount
+                    document.getElementById('colors').value = product && product.colors ? product.colors : '';
+                    document.getElementById('material').value = product ? product.material : '';
+                    document.getElementById('discount_amount').value = product ? product.discount_amount : 0.00;
 
-    // Display current image if available
-    const currentProductImageDiv = document.getElementById('currentProductImage');
-    currentProductImageDiv.innerHTML = ''; // Clear previous image
-    if (product && product.image_url) {
-        const img = document.createElement('img');
-        img.src = '../' + product.image_url; // Adjust path as needed
-        img.alt = 'Product Image';
-        img.style.maxWidth = '100px';
-        img.style.maxHeight = '100px';
-        currentProductImageDiv.appendChild(img);
-    }
+                    const currentProductImageDiv = document.getElementById('currentProductImage');
+                    currentProductImageDiv.innerHTML = '';
+                    if (product && product.image_url) {
+                        const img = document.createElement('img');
+                        img.src = '../uploads/products/' + product.image_url;
+                        img.alt = 'Product Image';
+                        img.style.maxWidth = '100px';
+                        img.style.maxHeight = '100px';
+                        currentProductImageDiv.appendChild(img);
+                    }
 
-    // Clear image input when opening modal
-    document.getElementById('productImage').value = '';
+                    document.getElementById('productImage').value = '';
                     document.getElementById('productModalLabel').textContent = 'แก้ไขสินค้า';
-                    productModalElement.modal('show'); // Show Bootstrap 4 modal
+                    productModalElement.modal('show');
                 } else {
                     Swal.fire('ข้อผิดพลาด', 'ไม่พบรายละเอียดสินค้า: ' + data.message, 'error');
                 }
@@ -228,14 +244,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(this);
             const url = productIdInput.value ? '../api/admin/admin_update_product.php' : '../api/admin/admin_create_product.php';
 
+            // Explicitly append values for fields that might be problematic
+            formData.set('stock', productStockInput.value === '' ? '0' : productStockInput.value);
+            formData.set('is_active', productIsActiveInput.value);
+
             formData.append('colors', document.getElementById('colors').value);
-            formData.append('material', document.getElementById('material').value); // Add material
-            formData.append('discount_amount', document.getElementById('discount_amount').value); // Add discount_amount
+            formData.append('material', document.getElementById('material').value);
+            formData.append('discount_amount', document.getElementById('discount_amount').value);
 
             const productImageInput = document.getElementById('productImage');
             if (productImageInput.files.length > 0) {
-                formData.append('productImage', productImageInput.files[0]); // Add image file
+                formData.append('productImage', productImageInput.files[0]);
             }
+
+            console.log('--- FormData Content ---');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+            console.log('------------------------');
 
             try {
                 const response = await fetch(url, {
@@ -246,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (data.success) {
                     Swal.fire('สำเร็จ', data.message, 'success');
-                    productModalElement.modal('hide'); // Hide Bootstrap 4 modal
+                    productModalElement.modal('hide');
                     fetchProducts();
                 } else {
                     Swal.fire('ข้อผิดพลาด', 'Error: ' + data.message, 'error');
@@ -257,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        $(productsTableBody).on('click', '.delete-btn', async function() {
+        $('#productsTable').on('click', '.delete-btn', async function() {
             const productId = $(this).data('id');
             Swal.fire({
                 title: 'คุณแน่ใจหรือไม่?',
@@ -417,7 +443,6 @@ document.addEventListener('DOMContentLoaded', function() {
             $('.sidebar .collapse').collapse('hide');
         };
         
-        // Toggle the side navigation when window is resized below 480px
         if ($(window).width() < 480 && !$(".sidebar").hasClass("toggled")) {
             $("body").addClass("sidebar-toggled");
             $(".sidebar").addClass("toggled");
